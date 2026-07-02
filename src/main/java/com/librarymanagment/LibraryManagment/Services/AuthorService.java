@@ -39,6 +39,17 @@ public class AuthorService {
     }
 
 
+    @Transactional
+    public Author saveAuthor(AuthorResponseDTO author){
+        Author createdAuthor = new Author();
+
+        createdAuthor.setId(author.id());
+        createdAuthor.setAuthorName(author.authorName());
+        createdAuthor.setNationality(author.nationality());
+        return authorRepository.save(createdAuthor);
+    }
+
+
     public List<Author> findAll(){
         return authorRepository.findAll();
     }
