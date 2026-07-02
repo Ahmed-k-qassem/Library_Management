@@ -73,21 +73,21 @@ public class AuthorController {
         Author targetAuthor = authorService.findById(id);
 
 
-        AuthorRequestDTO patchedAuthor = applyPatchToAuthor(patchBody, authorService.castToAuthorRequestDTO(targetAuthor));
+        AuthorResponseDTO responseDTO = applyPatchToAuthor(patchBody, authorService.castToAuthorResponseDTO(targetAuthor));
 
 
-        return ResponseEntity.ok(authorService.castToAuthorResponseDTO(authorService.saveAuthor(patchedAuthor)));
+        return ResponseEntity.ok(authorService.castToAuthorResponseDTO(authorService.saveAuthor(responseDTO)));
     }
 
 
-    private AuthorRequestDTO applyPatchToAuthor(String patchBody, AuthorRequestDTO targetAuthor) {
+    private AuthorResponseDTO applyPatchToAuthor(String patchBody, AuthorResponseDTO targetAuthor) {
         try {
             JsonNode patchNode = objectMapper.readTree(patchBody);
             JsonNode targetNode = objectMapper.convertValue(targetAuthor, JsonNode.class);
 
             JsonNode patchedNode = JsonPatch.apply(patchNode, targetNode);
 
-            return objectMapper.treeToValue(patchedNode, AuthorRequestDTO.class);
+            return objectMapper.treeToValue(patchedNode, AuthorResponseDTO.class);
         } catch (JsonProcessingException e) {
             throw new JsonPatchProcessingException("Invalid patch format: " + e.getMessage());
         }
