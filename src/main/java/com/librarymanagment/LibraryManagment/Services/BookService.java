@@ -64,6 +64,15 @@ public class BookService {
     }
 
 
+    @Transactional
+    public void deleteBookById(long id){
+        int rowsAffected = bookRepository.deleteBookById(id);
+        if(rowsAffected == 0){
+            throw new EntityNotFoundException("Book has not been found");
+        }
+    }
+
+
     public BookResponseDTO castToBookResponseDTO(Book book) {
         return new BookResponseDTO(
                 book.getId(),
