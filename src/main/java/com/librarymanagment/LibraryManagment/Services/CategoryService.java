@@ -51,10 +51,6 @@ public class CategoryService {
     }
 
 
-    public CategoryRequestDTO castToCategoryRequestDTO(Category category){
-        return new CategoryRequestDTO(category.getName());
-    }
-
     public CategoryResponseDTO castToCategoryResponseDTO(Category category){
         return new CategoryResponseDTO(category.getId(), category.getName());
     }
