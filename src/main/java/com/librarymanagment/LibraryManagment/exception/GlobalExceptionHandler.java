@@ -2,8 +2,10 @@ package com.librarymanagment.LibraryManagment.exception;
 
 import com.librarymanagment.LibraryManagment.dto.Response.HttpDTO;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,5 +46,20 @@ public class GlobalExceptionHandler {
 
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<HttpDTO> handleUsernameNotFound(UsernameNotFoundException exc){
+        HttpDTO error = new HttpDTO(exc.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<HttpDTO> handleDataIntegrityViolation(DataIntegrityViolationException exc){
+        HttpDTO error = new HttpDTO("An error occurred while processing your data. Please review your input and try again.", HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 }
