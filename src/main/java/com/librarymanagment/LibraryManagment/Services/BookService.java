@@ -30,11 +30,6 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    @Transactional
-    public Book saveBook(Book book){
-        return bookRepository.save(book);
-    }
-
 
     @Transactional
     public List<BookAuthorDTO> getBooksForAuthor(long id){
