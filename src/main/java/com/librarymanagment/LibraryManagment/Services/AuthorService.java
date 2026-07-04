@@ -69,9 +69,6 @@ public class AuthorService {
     }
 
 
-    public AuthorRequestDTO castToAuthorRequestDTO(Author author){
-        return new AuthorRequestDTO(author.getAuthorName(), author.getNationality());
-    }
 
     public AuthorResponseDTO castToAuthorResponseDTO(Author author){
         return new AuthorResponseDTO(author.getId(), author.getAuthorName(), author.getNationality());
