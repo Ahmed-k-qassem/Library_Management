@@ -38,7 +38,7 @@ public class UserService {
 
 
     public UserResponseDTO castUserToResponseDTO(User user){
-        return new UserResponseDTO(user.getId(), user.getUsername(), user.getPassword(), user.getRole());
+        return new UserResponseDTO(user.getId(), user.getUsername(), user.getRole());
     }
 
 
