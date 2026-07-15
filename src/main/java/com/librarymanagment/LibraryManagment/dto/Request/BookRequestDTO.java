@@ -5,24 +5,25 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
-public record  BookRequestDTO(@NotBlank(message = "The title must be entered")
+public record  BookRequestDTO(
+                            @NotBlank(message = "The title must be entered")
                             @Size(min = 10, message = "Book title must be 10 or above in characters")
                             String title,
 
-                              @NotBlank(message = "You must enter ISBN")
+                            @NotBlank(message = "You must enter ISBN")
                             String isbn,
 
-                              @NotNull(message = "You must enter a page number")
+                            @NotNull(message = "You must enter a page number")
                             @Positive(message = "Pages cannot be negative")
                             int pageCount,
 
-                              @NotBlank(message = "Please select a status")
+                            @NotBlank(message = "Please select a status")
                             String status,
 
-                              @NotNull(message = "Author ID is required")
+                            @NotNull(message = "Author ID is required")
                             Long authorId,
 
-                              @NotNull(message = "Category ID is required")
+                            @NotNull(message = "Category ID is required")
                             Long categoryId){
 
 }
