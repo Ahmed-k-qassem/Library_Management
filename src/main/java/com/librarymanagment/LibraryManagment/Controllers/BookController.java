@@ -42,7 +42,7 @@ public class BookController {
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/authors/{authorId}")
+    @GetMapping("/author/{authorId}")
     public List<BookAuthorDTO> getBooksForAuthor(@PathVariable long authorId){
         return bookService.getBooksForAuthor(authorId);
     }
