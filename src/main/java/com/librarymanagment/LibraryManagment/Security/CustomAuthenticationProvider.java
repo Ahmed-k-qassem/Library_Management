@@ -1,27 +1,33 @@
 package com.librarymanagment.LibraryManagment.Security;
 
-import com.librarymanagment.LibraryManagment.Entities.User;
 import com.librarymanagment.LibraryManagment.Services.JpaUserDetailsService;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private JpaUserDetailsService userDetailsService;
-    private PasswordEncoder passwordEncoder;
+    private final JpaUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
-
+    public CustomAuthenticationProvider(JpaUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
-    public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        UserSecurity user = userDetailsService.loadUserByUsername(authentication.getName());
-        String rawPassword = authentication.getCredentials().toString();
-        return checkPassword(rawPassword,user,passwordEncoder);
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String username = authentication.getName();
+        String rawPassword = String.valueOf(authentication.getCredentials());
+
+        UserSecurity user = userDetailsService.loadUserByUsername(username);
+
+        return checkPassword(rawPassword, user);
     }
 
     @Override
@@ -29,12 +35,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-
-    private Authentication checkPassword(String rawPassword, UserSecurity user, PasswordEncoder passwordEncoder) {
-        if(passwordEncoder.matches(rawPassword, user.getPassword())){
-            return new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
-        } else{
+    private Authentication checkPassword(String rawPassword, UserSecurity user) {
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
+        return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
     }
 }
