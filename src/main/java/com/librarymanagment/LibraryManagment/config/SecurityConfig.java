@@ -24,7 +24,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/authors/**", "/api/categories/**").hasRole("ADMIN")
                         .requestMatchers("/api/books/**").hasRole("USER")
-                        .requestMatchers("/", "/**").permitAll()
                 )
                 // 3. Use Basic Auth instead of Form Login for REST APIs
                 .httpBasic(Customizer.withDefaults())
