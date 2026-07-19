@@ -4,6 +4,8 @@ import com.librarymanagment.LibraryManagment.Entities.Author;
 import com.librarymanagment.LibraryManagment.Repostries.AuthorRepository;
 import com.librarymanagment.LibraryManagment.dto.Request.AuthorRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.AuthorResponseDTO;
+import com.librarymanagment.LibraryManagment.util.mapper.AuthorMapper;
+import com.librarymanagment.LibraryManagment.util.GenericPatcher;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,48 +17,51 @@ public class AuthorService {
 
 
     private final AuthorRepository authorRepository;
-
-    public AuthorService(AuthorRepository authorRepository) {
+    private final AuthorMapper authorMapper;
+    private final GenericPatcher patchUtil;
+    public AuthorService(AuthorRepository authorRepository, AuthorMapper authorMapper, GenericPatcher patchUtil) {
         this.authorRepository = authorRepository;
-    }
-
-    public List<Author> getAllAuthors(){
-        return authorRepository.findAll();
-    }
-
-    @Transactional
-    public Author saveAuthor(AuthorRequestDTO author){
-        Author createdAuthor = new Author();
-
-        createdAuthor.setAuthorName(author.authorName());
-        createdAuthor.setNationality(author.nationality());
-        return authorRepository.save(createdAuthor);
-    }
-
-    @Transactional
-    public Author saveAuthor(Author author){
-        return authorRepository.save(author);
+        this.authorMapper = authorMapper;
+        this.patchUtil = patchUtil;
     }
 
 
     @Transactional
-    public Author saveAuthor(AuthorResponseDTO author){
-        Author createdAuthor = new Author();
-
-        createdAuthor.setId(author.id());
-        createdAuthor.setAuthorName(author.authorName());
-        createdAuthor.setNationality(author.nationality());
-        return authorRepository.save(createdAuthor);
+    public AuthorResponseDTO saveAuthor(AuthorRequestDTO authorDTO) {
+        Author newAuthor = authorMapper.mapRequestDTOToAuthor(authorDTO);
+        Author savedAuthor = authorRepository.save(newAuthor);
+        return authorMapper.mapAuthorToResponseDTO(savedAuthor);
     }
 
 
-    public List<Author> findAll(){
-        return authorRepository.findAll();
+    @Transactional
+    public AuthorResponseDTO updateAuthor(long id, AuthorRequestDTO requestDTO) {
+
+        Author existingAuthor = findById(id);
+
+        existingAuthor.setAuthorName(requestDTO.authorName());
+        existingAuthor.setNationality(requestDTO.nationality());
+
+        Author savedAuthor = authorRepository.save(existingAuthor);
+
+        return authorMapper.mapAuthorToResponseDTO(savedAuthor);
     }
 
 
-    public Author findById(long id){
-        return authorRepository.findAuthorById(id).orElseThrow(() -> new EntityNotFoundException("Author with ID " + id + " has not been found "));
+    public List<AuthorResponseDTO> findAll(){
+        return authorRepository.findAll()
+                .stream()
+                .map(authorMapper::mapAuthorToResponseDTO)
+                .toList();
+    }
+
+    public Author findById(long id) {
+        return authorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Author not found"));
+    }
+
+    public AuthorResponseDTO findByIdToResponse(long id){
+        return authorMapper.mapAuthorToResponseDTO(authorRepository.findAuthorById(id).orElseThrow(() -> new EntityNotFoundException("Author with ID " + id + " has not been found ")));
     }
 
 
@@ -69,8 +74,18 @@ public class AuthorService {
     }
 
 
+    @Transactional
+    public AuthorResponseDTO patchAuthor(long id, String patchBody) {
 
-    public AuthorResponseDTO castToAuthorResponseDTO(Author author){
-        return new AuthorResponseDTO(author.getId(), author.getAuthorName(), author.getNationality());
+        Author existingAuthor = findById(id);
+
+        AuthorResponseDTO dtoToPatch = authorMapper.mapAuthorToResponseDTO(existingAuthor);
+
+        AuthorResponseDTO patchedDto = patchUtil.applyPatch(patchBody, dtoToPatch, AuthorResponseDTO.class);
+
+        existingAuthor.setAuthorName(patchedDto.authorName());
+        existingAuthor.setNationality(patchedDto.nationality());
+
+        return authorMapper.mapAuthorToResponseDTO(authorRepository.save(existingAuthor));
     }
 }
