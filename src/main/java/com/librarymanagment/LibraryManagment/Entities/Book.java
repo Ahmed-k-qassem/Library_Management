@@ -48,7 +48,7 @@ public class Book {
         this.pageCount = pageCount;
     }
 
-    public Book(long id, String title, String isbn, int pageCount) {
+    public Book(long id, String title, String isbn, int pageCount, String status, Date addedDate, Author author, Category category) {
         this.id = id;
         this.title = title;
         this.isbn = isbn;
