@@ -7,6 +7,7 @@ import com.librarymanagment.LibraryManagment.Repostries.BookRepository;
 import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BookResponseDTO;
+import com.librarymanagment.LibraryManagment.util.mapper.BookMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +20,14 @@ public class BookService {
     private final BookRepository bookRepository;
     private final AuthorService authorService;
     private final CategoryService categoryService;
-    public BookService(BookRepository bookRepository, AuthorService authorService, CategoryService categoryService) {
+    private final BookMapper bookMapper;
+    public BookService(BookRepository bookRepository, AuthorService authorService, CategoryService categoryService,  BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.authorService = authorService;
         this.categoryService = categoryService;
+        this.bookMapper = bookMapper;
     }
 
-
-    public List<Book> getAllBooks(){
-        return bookRepository.findAll();
-    }
 
 
     @Transactional
@@ -43,19 +42,17 @@ public class BookService {
 
 
     @Transactional
-    public Book createBook(BookRequestDTO dto){
+    public BookResponseDTO getBookResponseById(long id){
+        return bookMapper.mapBookToResponseDTO(getBookById(id));
+    }
+
+
+    @Transactional
+    public BookResponseDTO createBook(BookRequestDTO dto){
         Author author = authorService.findById(dto.authorId());
         Category category = categoryService.getCategoryById(dto.categoryId());
 
-        Book newBook = new Book();
-        newBook.setTitle(dto.title());
-        newBook.setIsbn(dto.isbn());
-        newBook.setPageCount(dto.pageCount());
-        newBook.setStatus(dto.status());
-        newBook.setAuthor(author);
-        newBook.setCategory(category);
-
-        return bookRepository.save(newBook);
+        return bookMapper.mapBookToResponseDTO(bookRepository.save(bookMapper.mapRequestDTOtoBook(dto, author, category)));
     }
 
 
@@ -68,16 +65,12 @@ public class BookService {
     }
 
 
-    public BookResponseDTO castToBookResponseDTO(Book book) {
-        return new BookResponseDTO(
-                book.getId(),
-                book.getTitle(),
-                book.getIsbn(),
-                book.getPageCount(),
-                book.getStatus(),
-                book.getAddedDate(),
-                book.getAuthor().getAuthorName(),
-                book.getCategory().getName()
-        );
+    public List<BookResponseDTO> findAllBooks(){
+        return bookRepository.findAll()
+                .stream()
+                .map(bookMapper::mapBookToResponseDTO)
+                .toList();
     }
+
+
 }
