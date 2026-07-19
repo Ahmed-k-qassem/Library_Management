@@ -22,39 +22,32 @@ public class CategoryController {
 
 
     private final CategoryService categoryService;
-    private final ObjectMapper objectMapper;
-    public CategoryController(CategoryService categoryService, ObjectMapper objectMapper) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.objectMapper = objectMapper;
     }
 
     @GetMapping
     public List<CategoryResponseDTO> getCategoryList(){
-        return categoryService.getAllCategories()
-                .stream()
-                .map(categoryService::castToCategoryResponseDTO)
-                .toList();
+        return categoryService.getAllCategories();
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable long id){
-        return new ResponseEntity<>(categoryService.castToCategoryResponseDTO(categoryService.getCategoryById(id)), HttpStatus.OK);
+        CategoryResponseDTO categoryResponseDTO = categoryService.getCategoryResponseById(id);
+        return new ResponseEntity<>(categoryResponseDTO, HttpStatus.OK);
     }
 
 
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> saveCategory(@Valid @RequestBody CategoryRequestDTO category){
-        return new ResponseEntity<>(categoryService.castToCategoryResponseDTO(categoryService.saveCategory(category)), HttpStatus.CREATED);
+        return new ResponseEntity<>(categoryService.saveCategory(category), HttpStatus.CREATED);
     }
 
 
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable long id, @Valid @RequestBody CategoryRequestDTO requestDTO){
-        Category existing = categoryService.getCategoryById(id);
-        existing.setName(requestDTO.name());
-        Category updated = categoryService.saveCategory(existing);
-        return new ResponseEntity<>(categoryService.castToCategoryResponseDTO(updated), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.updateCategory(id,requestDTO), HttpStatus.OK);
     }
 
 
@@ -65,23 +58,9 @@ public class CategoryController {
     }
 
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = "application/json-patch+json")
     public ResponseEntity<CategoryResponseDTO> patchCategory(@PathVariable long id, @RequestBody String patch){
-        Category category = categoryService.getCategoryById(id);
-
-        return new ResponseEntity<>(categoryService.castToCategoryResponseDTO(categoryService.saveCategory(applyPatching(category, patch))), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.patchCategory(id,patch), HttpStatus.OK);
     }
 
-    private Category applyPatching(Category target, String patch){
-        try{
-            JsonNode patchedNode = objectMapper.readTree(patch);
-            JsonNode targetNode = objectMapper.convertValue(target, JsonNode.class);
-
-            JsonNode patchValue = JsonPatch.apply(patchedNode,targetNode);
-
-            return objectMapper.treeToValue(patchValue, Category.class);
-        } catch (JsonProcessingException e){
-            throw new JsonPatchProcessingException("Failed to do patch method on category");
-        }
-    }
 }
