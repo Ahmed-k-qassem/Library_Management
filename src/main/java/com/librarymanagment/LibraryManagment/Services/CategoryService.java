@@ -4,6 +4,8 @@ import com.librarymanagment.LibraryManagment.Entities.Category;
 import com.librarymanagment.LibraryManagment.Repostries.CategoryRepository;
 import com.librarymanagment.LibraryManagment.dto.Request.CategoryRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.CategoryResponseDTO;
+import com.librarymanagment.LibraryManagment.util.GenericPatcher;
+import com.librarymanagment.LibraryManagment.util.mapper.CategoryMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,22 +16,26 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-    public CategoryService(CategoryRepository categoryRepository) {
+    private final CategoryMapper categoryMapper;
+    private final GenericPatcher genericPatcher;
+    public CategoryService(CategoryRepository categoryRepository, CategoryMapper categoryMapper, GenericPatcher genericPatcher) {
         this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
+        this.genericPatcher = genericPatcher;
     }
 
 
-    public List<Category> getAllCategories(){
-        return categoryRepository.findAll();
+    public List<CategoryResponseDTO> getAllCategories(){
+        return categoryRepository.findAll()
+                .stream()
+                .map(categoryMapper::mapCategoryToResponseDTO)
+                .toList();
     }
 
 
     @Transactional
-    public Category saveCategory(CategoryRequestDTO category){
-        Category createdCategory = new Category();
-        createdCategory.setName(category.name());
-        return categoryRepository.save(createdCategory);
+    public CategoryResponseDTO saveCategory(CategoryRequestDTO category){
+        return categoryMapper.mapCategoryToResponseDTO(categoryRepository.save(categoryMapper.mapRequestDTOtoCategory(category)));
     }
 
     @Transactional
@@ -43,6 +49,11 @@ public class CategoryService {
     }
 
     @Transactional
+    public CategoryResponseDTO getCategoryResponseById(long id){
+        return categoryMapper.mapCategoryToResponseDTO(getCategoryById(id));
+    }
+
+    @Transactional
     public void deleteCategory(long id){
         int rowsAffected = categoryRepository.deleteCategoryById(id);
         if(rowsAffected == 0){
@@ -51,7 +62,22 @@ public class CategoryService {
     }
 
 
-    public CategoryResponseDTO castToCategoryResponseDTO(Category category){
-        return new CategoryResponseDTO(category.getId(), category.getName());
+    @Transactional
+    public CategoryResponseDTO updateCategory(long id,CategoryRequestDTO category){
+        Category updated = getCategoryById(id);
+        updated.setName(category.name());
+        return categoryMapper.mapCategoryToResponseDTO(saveCategory(updated));
     }
+
+
+    @Transactional
+    public CategoryResponseDTO patchCategory(long id, String patchBody){
+        Category category = getCategoryById(id);
+        CategoryResponseDTO dtoToPatch =  categoryMapper.mapCategoryToResponseDTO(category);
+        CategoryResponseDTO patchedDTO = genericPatcher.applyPatch(patchBody, dtoToPatch, CategoryResponseDTO.class);
+        category.setName(patchedDTO.name());
+        return categoryMapper.mapCategoryToResponseDTO(categoryRepository.save(category));
+    }
+
+
 }
