@@ -21,42 +21,31 @@ public class AuthorController {
 
 
     private final AuthorService authorService;
-    private final ObjectMapper objectMapper;
-    public AuthorController(AuthorService authorService, ObjectMapper objectMapper) {
+    public AuthorController(AuthorService authorService) {
         this.authorService = authorService;
-        this.objectMapper = objectMapper;
 
     }
 
     @GetMapping
     public List<AuthorResponseDTO> getAuthors(){
-        return authorService.findAll()
-                .stream()
-                .map(authorService::castToAuthorResponseDTO)
-                .toList();
+        return authorService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuthorResponseDTO> getAuthorById(@PathVariable long id){
-        AuthorResponseDTO responseDTO = authorService.castToAuthorResponseDTO(authorService.findById(id));
-        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        return new ResponseEntity<>(authorService.findByIdToResponse(id), HttpStatus.OK);
     }
 
 
     @PostMapping
     public ResponseEntity<AuthorResponseDTO> addAuthor(@Valid @RequestBody AuthorRequestDTO dto){
-        Author savedAuthor = authorService.saveAuthor(dto);
-        AuthorResponseDTO responseDTO= authorService.castToAuthorResponseDTO(savedAuthor);
-        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(authorService.saveAuthor(dto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AuthorResponseDTO> putAuthor(@PathVariable long id, @Valid @RequestBody AuthorRequestDTO requestDTO){
-        Author existing = authorService.findById(id);
-        existing.setAuthorName(requestDTO.authorName());
-        existing.setNationality(requestDTO.nationality());
-        AuthorResponseDTO responseDTO = authorService.castToAuthorResponseDTO(authorService.saveAuthor(existing));
-        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+
+        return new ResponseEntity<>(authorService.updateAuthor(id, requestDTO), HttpStatus.OK);
     }
 
 
@@ -67,30 +56,8 @@ public class AuthorController {
     }
 
 
-    @PatchMapping(path = "/{id}", consumes = "application/json-patch+json")
-    public ResponseEntity<AuthorResponseDTO> patchAuthor(@PathVariable long id, @RequestBody String patchBody) {
-
-        Author targetAuthor = authorService.findById(id);
-
-
-        AuthorResponseDTO responseDTO = applyPatchToAuthor(patchBody, authorService.castToAuthorResponseDTO(targetAuthor));
-
-
-        return ResponseEntity.ok(authorService.castToAuthorResponseDTO(authorService.saveAuthor(responseDTO)));
+    @PatchMapping(value= "/{id}", consumes = "application/json-patch+json")
+    public ResponseEntity<AuthorResponseDTO> patchAuthor(@PathVariable long id, @Valid @RequestBody String patchBody){
+        return new ResponseEntity<>(authorService.patchAuthor(id, patchBody), HttpStatus.OK);
     }
-
-
-    private AuthorResponseDTO applyPatchToAuthor(String patchBody, AuthorResponseDTO targetAuthor) {
-        try {
-            JsonNode patchNode = objectMapper.readTree(patchBody);
-            JsonNode targetNode = objectMapper.convertValue(targetAuthor, JsonNode.class);
-
-            JsonNode patchedNode = JsonPatch.apply(patchNode, targetNode);
-
-            return objectMapper.treeToValue(patchedNode, AuthorResponseDTO.class);
-        } catch (JsonProcessingException e) {
-            throw new JsonPatchProcessingException("Invalid patch format: " + e.getMessage());
-        }
-    }
-
 }
