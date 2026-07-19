@@ -19,16 +19,13 @@ public class UserController {
 
     @GetMapping
     public List<UserResponseDTO> getUsers(){
-        return userService.findAll()
-                .stream()
-                .map(user -> userService.castUserToResponseDTO(user))
-                .toList();
+        return userService.findAll();
     }
 
 
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO){
-        return new ResponseEntity<>(userService.castUserToResponseDTO(userService.save(userRequestDTO)), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.save(userRequestDTO), HttpStatus.CREATED);
     }
 
 
