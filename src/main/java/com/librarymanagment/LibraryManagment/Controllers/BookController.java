@@ -29,16 +29,13 @@ public class BookController {
 
     @GetMapping
     public List<BookResponseDTO> getBooks(){
-        return bookService.getAllBooks()
-                .stream()
-                .map(bookService::castToBookResponseDTO)
-                .toList();
+        return bookService.findAllBooks();
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<BookResponseDTO> getBookById(@PathVariable long id){
-        BookResponseDTO responseDTO = bookService.castToBookResponseDTO(bookService.getBookById(id));
+        BookResponseDTO responseDTO = bookService.getBookResponseById(id);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
@@ -50,8 +47,7 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<BookResponseDTO> addBook(@Valid @RequestBody BookRequestDTO book){
-        Book createdBook = bookService.createBook(book);
-        BookResponseDTO responseDTO = bookService.castToBookResponseDTO(createdBook);
+        BookResponseDTO responseDTO = bookService.createBook(book);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
