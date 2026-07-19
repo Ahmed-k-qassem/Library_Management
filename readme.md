@@ -7,7 +7,7 @@ A robust RESTful backend API built with Java and Spring Boot for managing librar
 This initial release focuses on core CRUD functionalities and database relationships using Spring Data JPA.
 
 **Security & Authentication:**
-Currently, the application implements a raw/custom security model via `CustomAuthenticationProvider` and `SecurityConfig` to handle basic user authentication and endpoint protection.
+Currently, the application implements a `SecurityConfig` to handle basic user authentication and endpoint protection.
 
 ## Roadmap: Upcoming in v2.0
 
