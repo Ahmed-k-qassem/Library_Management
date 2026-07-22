@@ -17,12 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
-    private final AuthorService authorService;
-    private final CategoryService categoryService;
     private final BookService bookService;
-    public BookController(AuthorService authorService, CategoryService categoryService, BookService bookService) {
-        this.authorService = authorService;
-        this.categoryService = categoryService;
+    public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
@@ -50,6 +46,8 @@ public class BookController {
         BookResponseDTO responseDTO = bookService.createBook(book);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
+
+
 
 
 
