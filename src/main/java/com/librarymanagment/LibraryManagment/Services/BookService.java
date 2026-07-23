@@ -3,6 +3,7 @@ package com.librarymanagment.LibraryManagment.Services;
 import com.librarymanagment.LibraryManagment.Entities.Author;
 import com.librarymanagment.LibraryManagment.Entities.Book;
 import com.librarymanagment.LibraryManagment.Entities.Category;
+import com.librarymanagment.LibraryManagment.Entities.Status;
 import com.librarymanagment.LibraryManagment.Repostries.BookRepository;
 import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
@@ -36,7 +37,7 @@ public class BookService {
     }
 
     @Transactional
-    public Book getBookById(long id){
+    protected Book getBookById(long id){
         return bookRepository.getBookById(id).orElseThrow( () -> new EntityNotFoundException("Book has not been found "));
     }
 
@@ -72,5 +73,11 @@ public class BookService {
                 .toList();
     }
 
+
+
+    protected Book updateStatus(Book book, Status status){
+        book.setStatus(status);
+        return bookRepository.save(book);
+    }
 
 }
