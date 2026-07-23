@@ -1,5 +1,8 @@
 package com.librarymanagment.LibraryManagment.dto.Request;
 
+import com.librarymanagment.LibraryManagment.Entities.Status;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,8 +20,8 @@ public record  BookRequestDTO(
                             @Positive(message = "Pages cannot be negative")
                             int pageCount,
 
-                            @NotBlank(message = "Please select a status")
-                            String status,
+                            @Enumerated(EnumType.STRING)
+                            Status status,
 
                             @NotNull(message = "Author ID is required")
                             Long authorId,

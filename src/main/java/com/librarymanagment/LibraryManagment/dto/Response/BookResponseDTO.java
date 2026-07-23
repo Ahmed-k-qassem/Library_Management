@@ -1,6 +1,8 @@
 package com.librarymanagment.LibraryManagment.dto.Response;
 
+import com.librarymanagment.LibraryManagment.Entities.Status;
+
 import java.util.Date;
 
-public record BookResponseDTO(long id, String title, String isbn, int pageCount, String status, Date addedDate, String authorName, String categoryName) {
+public record BookResponseDTO(long id, String title, String isbn, int pageCount, Status status, Date addedDate, String authorName, String categoryName) {
 }

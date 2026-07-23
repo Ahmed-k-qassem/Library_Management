@@ -1,3 +1,5 @@
 package com.librarymanagment.LibraryManagment.dto.Response;
 
-public record BookAuthorDTO(String bookName, String isbn, int pageCount, String status, String authorName){}
+import com.librarymanagment.LibraryManagment.Entities.Status;
+
+public record BookAuthorDTO(String bookName, String isbn, int pageCount, Status status, String authorName){}
