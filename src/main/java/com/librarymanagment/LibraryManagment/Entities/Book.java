@@ -23,9 +23,8 @@ public class Book {
     @Positive(message = "pages cannot be negative")
     private int pageCount;
 
-
-    @NotBlank(message = "please select a status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
 
     private Date addedDate = new Date();
@@ -48,11 +47,15 @@ public class Book {
         this.pageCount = pageCount;
     }
 
-    public Book(long id, String title, String isbn, int pageCount, String status, Date addedDate, Author author, Category category) {
+    public Book(long id, String title, String isbn, int pageCount, Status status, Date addedDate, Author author, Category category) {
         this.id = id;
         this.title = title;
         this.isbn = isbn;
         this.pageCount = pageCount;
+        this.status = status;
+        this.addedDate = addedDate;
+        this.author = author;
+        this.category = category;
     }
 
     public long getId() {
@@ -95,11 +98,11 @@ public class Book {
         this.addedDate = addedDate;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
