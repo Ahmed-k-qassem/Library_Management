@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/books/**").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/customers/**").hasRole("USER")
+                        .requestMatchers("/api/borrow/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 ).addFilterBefore(new BookRequestFilter(), BasicAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
