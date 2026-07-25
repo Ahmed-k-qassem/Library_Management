@@ -30,10 +30,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors( Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/authors/**", "/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers("/api/authors/**", "/api/categories/**", "/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/books/**").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/api/customers/**").hasRole("USER")
                         .requestMatchers("/api/borrow/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
