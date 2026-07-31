@@ -5,6 +5,8 @@ import com.librarymanagment.LibraryManagment.Repostries.UserRepository;
 import com.librarymanagment.LibraryManagment.dto.Request.UserRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.UserResponseDTO;
 import com.librarymanagment.LibraryManagment.util.mapper.UserMapper;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +36,18 @@ public class UserService {
 
 
     public User findByUsername(String username){
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
 
-
+    @Transactional
+    @PreAuthorize("#id == authentication.getPrincipal().getId() Or hasRole('ADMIN')")
+    public void deleteUserById(long id){
+        int deleted = userRepository.deleteUserById(id);
+        if(deleted == 0){
+            throw new EntityNotFoundException("User not found");
+        }
+    }
 
 
 
