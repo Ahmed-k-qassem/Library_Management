@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users/")
 public class UserController {
     private final UserService userService;
     public UserController(UserService userService) {
@@ -23,9 +23,16 @@ public class UserController {
     }
 
 
-    @PostMapping
+    @PostMapping("sign")
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO){
         return new ResponseEntity<>(userService.save(userRequestDTO), HttpStatus.CREATED);
+    }
+
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable long id){
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
     }
 
 
