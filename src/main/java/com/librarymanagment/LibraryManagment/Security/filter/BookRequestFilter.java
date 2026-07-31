@@ -12,19 +12,19 @@ public class BookRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String uri = request.getRequestURI();
 
-        return !uri.startsWith("/api/books");
+
+        return !request.getServletPath().equals("/api/books");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String requestId = request.getHeader("Kiosk_Request_Id");
-            if (requestId == null) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
+        int requestId = request.getIntHeader("Kiosk_Request_Id");
+        if(requestId <= 0){
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        }
+        System.out.println(requestId);
         doFilter(request,response,filterChain);
     }
 }
