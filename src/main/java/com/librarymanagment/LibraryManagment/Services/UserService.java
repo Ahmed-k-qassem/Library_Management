@@ -51,4 +51,8 @@ public class UserService {
                 .toList();
     }
 
+    public User findByKeycloakUserId(String keycloakUserId) {
+        return userRepository.findByKeycloakUserId(keycloakUserId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
 }
