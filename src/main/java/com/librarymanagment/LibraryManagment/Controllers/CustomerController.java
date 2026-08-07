@@ -1,13 +1,13 @@
 package com.librarymanagment.LibraryManagment.Controllers;
 
 
-import com.librarymanagment.LibraryManagment.Security.UserSecurity;
 import com.librarymanagment.LibraryManagment.Services.CustomerService;
 import com.librarymanagment.LibraryManagment.dto.Request.CustomerRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.CustomerResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class CustomerController {
 
 
     @PostMapping
-    public ResponseEntity<CustomerResponseDTO> saveCustomer(@RequestBody CustomerRequestDTO customerRequestDTO, @AuthenticationPrincipal UserSecurity userSecurity) {
-        return new ResponseEntity<>(customerService.createCustomer(customerRequestDTO, userSecurity.getUsername()), HttpStatus.CREATED);
+    public ResponseEntity<CustomerResponseDTO> saveCustomer(@RequestBody CustomerRequestDTO customerRequestDTO, @AuthenticationPrincipal Jwt jwt) {
+        return new ResponseEntity<>(customerService.createCustomer(customerRequestDTO, jwt.getSubject()), HttpStatus.CREATED);
     }
 }
