@@ -1,8 +1,16 @@
-spring:
-  profiles:
-    active: local
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
 server:
-  port: 8080
+  port: 8081
+
+spring:
+  application:
+    name: LibraryManagement
+  profiles:
+      active: local
+
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/library-realm}
+
