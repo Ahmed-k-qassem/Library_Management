@@ -1,14 +1,13 @@
 package com.librarymanagment.LibraryManagment.Entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 
 @Entity
 @Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -18,28 +17,26 @@ public class User {
     private String username;
 
     @NotNull
-    @Size(min = 8)
-    private String password;
+    private String keycloakUserId;
 
     private String role;
 
-    public User(){
+    public User() {
         username = null;
-        password = null;
+        keycloakUserId = null;
         role = null;
     }
 
-
-    public User(String username, String password, String role) {
+    public User(String username, String keycloakUserId, String role) {
         this.username = username;
-        this.password = password;
+        this.keycloakUserId = keycloakUserId;
         this.role = role;
     }
 
-    public User(long id, String username, String password, String role) {
+    public User(long id, String username, String keycloakUserId, String role) {
         this.id = id;
         this.username = username;
-        this.password = password;
+        this.keycloakUserId = keycloakUserId;
         this.role = role;
     }
 
@@ -59,12 +56,12 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getKeycloakUserId() {
+        return keycloakUserId;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setKeycloakUserId(String keycloakUserId) {
+        this.keycloakUserId = keycloakUserId;
     }
 
     public String getRole() {
