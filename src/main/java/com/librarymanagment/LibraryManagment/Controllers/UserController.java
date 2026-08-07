@@ -5,6 +5,8 @@ import com.librarymanagment.LibraryManagment.dto.Request.UserRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.UserResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,15 +25,9 @@ public class UserController {
     }
 
 
-    @PostMapping("sign")
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userRequestDTO){
-        return new ResponseEntity<>(userService.save(userRequestDTO), HttpStatus.CREATED);
-    }
-
-
-    @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable long id){
-        userService.deleteUserById(id);
+    @DeleteMapping("admin/{uuid}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String uuid){
+        userService.deleteUserByKeycloakId(uuid);
         return ResponseEntity.noContent().build();
     }
 
