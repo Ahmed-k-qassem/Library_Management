@@ -10,10 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CustomerService {
@@ -27,10 +24,10 @@ public class CustomerService {
     }
 
     @Transactional
-    public CustomerResponseDTO createCustomer(CustomerRequestDTO customerRequestDTO, String username) {
-        User user = userService.findByUsername(username);
+    public CustomerResponseDTO createCustomer(CustomerRequestDTO customerRequestDTO, String keyCloakUserid) {
+        User user = userService.findByKeycloakUserId(keyCloakUserid);
         Customer customer = customerMapper.mapRequestDTOtoCustomer(customerRequestDTO, user);
-        return customerMapper.mapCustomerToResponseDTO(customerRepository.save(customer), user.getId());
+        return customerMapper.mapCustomerToResponseDTO(customerRepository.save(customer), user.getKeycloakUserId());
     }
 
 
@@ -44,7 +41,7 @@ public class CustomerService {
     @Transactional
     public CustomerResponseDTO getCustomerResponseById(long id, String username) {
         User user = userService.findByUsername(username);
-        return customerMapper.mapCustomerToResponseDTO(getCustomerById(id), user.getId());
+        return customerMapper.mapCustomerToResponseDTO(getCustomerById(id), user.getKeycloakUserId());
     }
 
 
@@ -52,7 +49,7 @@ public class CustomerService {
     public List<CustomerResponseDTO> getAllCustomers(){
         return customerRepository.findAll()
                 .stream()
-                .map(customer -> customerMapper.mapCustomerToResponseDTO(customer, customer.getUser().getId()))
+                .map(customer -> customerMapper.mapCustomerToResponseDTO(customer, customer.getUser().getKeycloakUserId()))
                 .toList();
     }
 }
