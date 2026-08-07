@@ -85,4 +85,10 @@ public class GlobalExceptionHandler {
         HttpDTO error = new HttpDTO(exc.getMessage(), HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(BookNotAvailableException.class)
+    public ResponseEntity<HttpDTO> bookNotAvailableException(BookNotAvailableException exc){
+        HttpDTO error = new HttpDTO(exc.getMessage(), HttpStatus.SERVICE_UNAVAILABLE.value());
+        return new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
+    }
 }
