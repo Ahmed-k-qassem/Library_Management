@@ -1,7 +1,7 @@
 package com.librarymanagment.LibraryManagment.Entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
+
 
 @Entity
 public class Customer {
