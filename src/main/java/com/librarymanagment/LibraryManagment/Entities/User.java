@@ -17,6 +17,7 @@ public class User {
     private String username;
 
     @NotNull
+    @Column(name = "keycloak_user_id", nullable = false)
     private String keycloakUserId;
 
     private String role;
