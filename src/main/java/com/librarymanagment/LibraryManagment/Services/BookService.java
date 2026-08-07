@@ -8,6 +8,7 @@ import com.librarymanagment.LibraryManagment.Repostries.BookRepository;
 import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BookResponseDTO;
+import com.librarymanagment.LibraryManagment.exception.BookNotAvailableException;
 import com.librarymanagment.LibraryManagment.util.mapper.BookMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,9 @@ public class BookService {
 
 
     protected Book updateStatus(Book book, Status status){
+        if (book.getStatus() == Status.BORROWED) {
+            throw new BookNotAvailableException("Book is already borrowed");
+        }
         book.setStatus(status);
         return bookRepository.save(book);
     }
