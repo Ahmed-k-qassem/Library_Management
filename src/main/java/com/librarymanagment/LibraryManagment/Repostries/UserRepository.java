@@ -18,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("DELETE FROM User u WHERE u.id = :id")
     int deleteUserById(@Param("id") long id);
+
+
+    boolean existsByKeycloakUserId(String uuid);
+
 }
