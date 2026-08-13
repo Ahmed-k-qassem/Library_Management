@@ -55,4 +55,17 @@ public class UserService {
         return userRepository.findByKeycloakUserId(keycloakUserId).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
+    @Transactional
+    public void syncUser(String uuid, String username, String role) {
+
+        if (!userRepository.existsByKeycloakUserId(uuid)) {
+            User newUser = new User();
+            newUser.setKeycloakUserId(uuid);
+            newUser.setUsername(username);
+            newUser.setRole(role);
+
+            userRepository.save(newUser);
+            System.out.println("Provisioned new user: " + username);
+        }
+    }
 }
