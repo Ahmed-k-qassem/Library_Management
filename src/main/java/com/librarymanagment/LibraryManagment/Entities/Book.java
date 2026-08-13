@@ -11,7 +11,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Size(min = 10, message = "book title must be 10 or above in characters")
+    @Size(min = 3, message = "book title must be 10 or above in characters")
     @NotBlank(message = "the title must be entered")
     private String title;
     
