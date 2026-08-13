@@ -1,6 +1,8 @@
 package com.librarymanagment.LibraryManagment.config;
 
 import com.librarymanagment.LibraryManagment.Security.KeycloakRoleConverter;
+import com.librarymanagment.LibraryManagment.Security.filter.UserSynchronizationFilter;
+import com.librarymanagment.LibraryManagment.Services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -9,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -22,13 +25,14 @@ import java.util.List;
 public class SecurityConfig {
 
     private final KeycloakRoleConverter keycloakRoleConverter;
-
-    public SecurityConfig(KeycloakRoleConverter keycloakRoleConverter) {
+    private final UserService userService;
+    public SecurityConfig(KeycloakRoleConverter keycloakRoleConverter, UserService userService) {
         this.keycloakRoleConverter = keycloakRoleConverter;
+        this.userService = userService;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -44,6 +48,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
+                .addFilterAfter(new UserSynchronizationFilter(userService), BearerTokenAuthenticationFilter.class)
                 .build();
     }
 
