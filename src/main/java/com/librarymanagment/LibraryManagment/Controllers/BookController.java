@@ -1,10 +1,7 @@
 package com.librarymanagment.LibraryManagment.Controllers;
 
-import com.librarymanagment.LibraryManagment.Entities.Book;
-import com.librarymanagment.LibraryManagment.Services.AuthorService;
 import com.librarymanagment.LibraryManagment.Services.BookService;
-import com.librarymanagment.LibraryManagment.Services.CategoryService;
-import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
+import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorResponseDTO;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BookResponseDTO;
 import jakarta.validation.Valid;
@@ -36,7 +33,7 @@ public class BookController {
     }
 
     @GetMapping("/author/{authorId}")
-    public List<BookAuthorDTO> getBooksForAuthor(@PathVariable long authorId){
+    public List<BookAuthorResponseDTO> getBooksForAuthor(@PathVariable long authorId){
         return bookService.getBooksForAuthor(authorId);
     }
 
