@@ -5,7 +5,7 @@ import com.librarymanagment.LibraryManagment.Entities.Book;
 import com.librarymanagment.LibraryManagment.Entities.Category;
 import com.librarymanagment.LibraryManagment.Entities.Status;
 import com.librarymanagment.LibraryManagment.Repostries.BookRepository;
-import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
+import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorResponseDTO;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BookResponseDTO;
 import com.librarymanagment.LibraryManagment.exception.BookNotAvailableException;
@@ -33,7 +33,7 @@ public class BookService {
 
 
     @Transactional
-    public List<BookAuthorDTO> getBooksForAuthor(long id){
+    public List<BookAuthorResponseDTO> getBooksForAuthor(long id){
         return bookRepository.getBooksByAuthorId(id);
     }
 
