@@ -1,7 +1,7 @@
 package com.librarymanagment.LibraryManagment.Repostries;
 
 import com.librarymanagment.LibraryManagment.Entities.Book;
-import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO;
+import com.librarymanagment.LibraryManagment.dto.Response.BookAuthorResponseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,10 +14,10 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    @Query("SELECT new com.librarymanagment.LibraryManagment.dto.Response.BookAuthorDTO(b.title, b.isbn, b.pageCount, b.status, a.authorName) " +
+    @Query("SELECT new com.librarymanagment.LibraryManagment.dto.Response.BookAuthorResponseDTO(b.title, b.isbn, b.pageCount, b.status, a.authorName) " +
             "FROM Book b JOIN b.author a " +
             "WHERE a.id = :id")
-    List<BookAuthorDTO> getBooksByAuthorId(@Param("id") long id);
+    List<BookAuthorResponseDTO> getBooksByAuthorId(@Param("id") long id);
 
 
     Optional<Book> getBookById(long id);
