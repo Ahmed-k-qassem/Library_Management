@@ -5,10 +5,13 @@ import com.librarymanagment.LibraryManagment.Repostries.AuthorRepository;
 import com.librarymanagment.LibraryManagment.Services.AuthorService;
 import com.librarymanagment.LibraryManagment.dto.Request.AuthorRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.AuthorResponseDTO;
+import com.librarymanagment.LibraryManagment.exception.JsonPatchProcessingException;
 import com.librarymanagment.LibraryManagment.util.dto.request.AuthorRequestDtoTestDataBuilder;
 import com.librarymanagment.LibraryManagment.util.dto.response.AuthorResponseDtoTestDataBuilder;
 import com.librarymanagment.LibraryManagment.util.entity.AuthorTestDataBuilder;
 import com.librarymanagment.LibraryManagment.util.GenericPatcher;
+import com.librarymanagment.LibraryManagment.util.entity.GenericPatcherTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.entity.PatchBodyBuilder;
 import com.librarymanagment.LibraryManagment.util.mapper.AuthorMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -154,4 +157,95 @@ class AuthorServiceTest {
 
         verify(authorMapper, never()).mapAuthorToResponseDTO(any());
     }
+
+
+
+    @Test
+    void patchAuthor_ShouldMutateStateAndReturnResponse() {
+        Long authorId = 1L;
+        String patchBody = PatchBodyBuilder.getInstance()
+                .withAttribute("authorName")
+                .withValue("fibi nono")
+                .build();
+
+        Author existingAuthor = AuthorTestDataBuilder.anAuthor()
+                .withAuthorName("nono")
+                .withNationality("syrian")
+                .build();
+
+        AuthorResponseDTO dtoToPatch = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto()
+                .withName("nono")
+                .withNationality("syrian")
+                .build();
+
+        AuthorResponseDTO patchedDto = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto()
+                .withName("fibi nono")
+                .withNationality("syrian")
+                .build();
+
+        AuthorResponseDTO expectedResponse = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto()
+                .withName("fibi nono")
+                .withNationality("syrian")
+                .build();
+
+        when(authorRepository.findById(authorId)).thenReturn(Optional.of(existingAuthor));
+
+        when(authorMapper.mapAuthorToResponseDTO(existingAuthor))
+                .thenReturn(dtoToPatch, expectedResponse);
+
+        when(patchUtil.applyPatch(patchBody, dtoToPatch, AuthorResponseDTO.class))
+                .thenReturn(patchedDto);
+
+        AuthorResponseDTO actual = authorService.patchAuthor(authorId, patchBody);
+
+        assertThat(actual).isEqualTo(expectedResponse);
+        assertThat(existingAuthor.getAuthorName()).isEqualTo("fibi nono");
+        assertThat(existingAuthor.getNationality()).isEqualTo("syrian");
+
+        verify(authorRepository).findById(authorId);
+        verify(patchUtil).applyPatch(patchBody, dtoToPatch, AuthorResponseDTO.class);
+        verify(authorMapper, times(2)).mapAuthorToResponseDTO(existingAuthor);
+
+        verifyNoMoreInteractions(authorRepository, authorMapper, patchUtil);
+    }
+
+
+    @Test
+    void patchAuthor_ShouldThrowException_ForNullPatchBody(){
+        Long authorId = 1L;
+        String patchBody = null;
+
+        assertThatThrownBy(() -> authorService.patchAuthor(authorId, patchBody))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Dev error: The patch body sent is null");
+
+
+        verifyNoInteractions(authorRepository, authorMapper, patchUtil);
+    }
+
+    @Test
+    void patchAuthor_ShouldThrowException_WhenPatchBodyIsInvalid() {
+        Long authorId = 1L;
+        String bustedPatchBody = "straight up garbage json";
+
+        Author existingAuthor = AuthorTestDataBuilder.anAuthor().build();
+        AuthorResponseDTO dtoToPatch = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto().build();
+
+        when(authorRepository.findById(authorId)).thenReturn(Optional.of(existingAuthor));
+        when(authorMapper.mapAuthorToResponseDTO(existingAuthor)).thenReturn(dtoToPatch);
+
+        when(patchUtil.applyPatch(bustedPatchBody, dtoToPatch, AuthorResponseDTO.class))
+                .thenThrow(new JsonPatchProcessingException("Failed to apply patch: Unrecognized token"));
+
+        assertThatThrownBy(() -> authorService.patchAuthor(authorId, bustedPatchBody))
+                .isInstanceOf(JsonPatchProcessingException.class)
+                .hasMessageContaining("Failed to apply patch");
+
+        verify(authorRepository).findById(authorId);
+        verify(authorMapper, times(1)).mapAuthorToResponseDTO(existingAuthor);
+        verify(patchUtil).applyPatch(bustedPatchBody, dtoToPatch, AuthorResponseDTO.class);
+
+        verifyNoMoreInteractions(authorRepository, authorMapper, patchUtil);
+    }
+
 }
