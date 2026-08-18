@@ -5,8 +5,12 @@ import com.librarymanagment.LibraryManagment.Repostries.AuthorRepository;
 import com.librarymanagment.LibraryManagment.Services.AuthorService;
 import com.librarymanagment.LibraryManagment.dto.Request.AuthorRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.AuthorResponseDTO;
+import com.librarymanagment.LibraryManagment.util.dto.request.AuthorRequestDtoTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.dto.response.AuthorResponseDtoTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.entity.AuthorTestDataBuilder;
 import com.librarymanagment.LibraryManagment.util.GenericPatcher;
 import com.librarymanagment.LibraryManagment.util.mapper.AuthorMapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 
@@ -37,9 +42,9 @@ class AuthorServiceTest {
     @Test
     void saveAuthor_ShouldReturnResponseDTO() {
 
-        AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "British");
-        Author authorEntity = new Author(1L, "Tolkien", "British");
-        AuthorResponseDTO expectedResponse = new AuthorResponseDTO(1L, "Tolkien", "British");
+        AuthorRequestDTO request = AuthorRequestDtoTestDataBuilder.anAuthorRequestDTO().build();
+        Author authorEntity = AuthorTestDataBuilder.anAuthor().build();
+        AuthorResponseDTO expectedResponse = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto().build();
 
         when(authorMapper.mapRequestDTOToAuthor(request)).thenReturn(authorEntity);
         when(authorRepository.save(authorEntity)).thenReturn(authorEntity);
@@ -69,8 +74,8 @@ class AuthorServiceTest {
     @Test
     void findByIdToResponse_ShouldReturnAuthorResponseDTO() {
         Long authorId = 1L;
-        Author mockAuthor = new Author(authorId, "George Orwell", "British");
-        AuthorResponseDTO expectedDto = new AuthorResponseDTO(authorId, "George Orwell", "British");
+        Author mockAuthor = AuthorTestDataBuilder.anAuthor().build();
+        AuthorResponseDTO expectedDto = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto().build();
 
 
         when(authorRepository.findById(authorId)).thenReturn(Optional.of(mockAuthor));
@@ -90,13 +95,28 @@ class AuthorServiceTest {
         verify(authorMapper, times(1)).mapAuthorToResponseDTO(mockAuthor);
     }
 
+    @Test
+    void findByIdResponse_ShouldThrowException_WhenNoAuthorFound(){
+        Long authorId = 1L;
+
+        when(authorRepository.findById(authorId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authorService.findByIdToResponse(authorId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Author not found");
+
+        verify(authorRepository, times(1)).findById(authorId);
+        verify(authorMapper, times(0)).mapAuthorToResponseDTO(any());
+    }
 
     @Test
     void updateAuthor_ShouldReturnUpdatedAuthor(){
         Long authorId = 1L;
-        Author mockAuthor = new Author(authorId, "Ahmed", "Syrian");
-        AuthorResponseDTO expected = new AuthorResponseDTO(authorId, "j3fr", "Syrian");
-        AuthorRequestDTO requestDTO = new AuthorRequestDTO("j3fr", "Syrian");
+        Author mockAuthor = AuthorTestDataBuilder.anAuthor().build();
+        AuthorResponseDTO expected = AuthorResponseDtoTestDataBuilder.anAuthorResponseDto()
+                .withName("j3fr").build();
+        AuthorRequestDTO requestDTO = AuthorRequestDtoTestDataBuilder.anAuthorRequestDTO()
+                .withName("j3fr").build();
 
         when(authorRepository.findById(authorId)).thenReturn(Optional.of(mockAuthor));
         when(authorMapper.mapAuthorToResponseDTO(mockAuthor)).thenReturn(expected);
@@ -108,5 +128,30 @@ class AuthorServiceTest {
 
         verify(authorRepository, times(1)).findById(authorId);
         verify(authorMapper, times(1)).mapAuthorToResponseDTO(mockAuthor);
+    }
+
+
+    @Test
+    void updateAuthor_ShouldThrowException_WhenAuthorNotFound() {
+
+        Long invalidAuthorId = 999L;
+
+
+        AuthorRequestDTO requestDTO = AuthorRequestDtoTestDataBuilder.anAuthorRequestDTO()
+                .withName("j3fr")
+                .withNationality("Syrian")
+                .build();
+
+
+        when(authorRepository.findById(invalidAuthorId)).thenReturn(Optional.empty());
+
+
+        assertThatThrownBy(() -> authorService.updateAuthor(invalidAuthorId, requestDTO))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Author not found");
+
+        verify(authorRepository, times(1)).findById(invalidAuthorId);
+
+        verify(authorMapper, never()).mapAuthorToResponseDTO(any());
     }
 }
