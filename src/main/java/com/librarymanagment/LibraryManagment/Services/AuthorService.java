@@ -40,7 +40,7 @@ public class AuthorService {
         Author existingAuthor = findById(id);
         existingAuthor.setAuthorName(requestDTO.authorName());
         existingAuthor.setNationality(requestDTO.nationality());
-        return authorMapper.mapAuthorToResponseDTO(existingAuthor);
+        return authorMapper.mapAuthorToResponseDTO(authorRepository.save(existingAuthor));
     }
 
     public List<AuthorResponseDTO> findAll() {
