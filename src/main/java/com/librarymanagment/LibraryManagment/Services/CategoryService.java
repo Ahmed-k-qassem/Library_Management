@@ -9,6 +9,7 @@ import com.librarymanagment.LibraryManagment.util.mapper.CategoryMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -35,14 +36,9 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponseDTO saveCategory(CategoryRequestDTO category){
+        Assert.notNull(category, "Dev error: request is null");
         return categoryMapper.mapCategoryToResponseDTO(categoryRepository.save(categoryMapper.mapRequestDTOtoCategory(category)));
     }
-
-    @Transactional
-    public Category saveCategory(Category category){
-        return categoryRepository.save(category);
-    }
-
 
     public Category getCategoryById(long id){
         return categoryRepository.getCategoryById(id).orElseThrow(() -> new EntityNotFoundException("Category not found"));
@@ -66,7 +62,7 @@ public class CategoryService {
     public CategoryResponseDTO updateCategory(long id,CategoryRequestDTO category){
         Category updated = getCategoryById(id);
         updated.setName(category.name());
-        return categoryMapper.mapCategoryToResponseDTO(saveCategory(updated));
+        return categoryMapper.mapCategoryToResponseDTO(categoryRepository.save(updated));
     }
 
 
