@@ -61,6 +61,19 @@ class AuthorServiceTest {
         verify(authorRepository, times(1)).save(authorEntity);
     }
 
+
+    @Test
+    void saveAuthor_ShouldThrowException_WhenRequestIsNull(){
+        AuthorRequestDTO request = null;
+
+        assertThatThrownBy(() -> authorService.saveAuthor(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Dev error: Author request id cannot be null");
+
+        verify(authorRepository, times(0)).save(any());
+        verifyNoInteractions(authorRepository);
+    }
+
     @Test
     void delete_ShouldCallRepositoryDelete() {
 
@@ -72,6 +85,18 @@ class AuthorServiceTest {
 
         verify(authorRepository, times(1)).deleteAuthorById(authorId);
     }
+
+    @Test
+    void delete_ShouldTrowException_WhenAuthorIdIsWrong(){
+        Long authorId = 999L;
+
+        assertThatThrownBy(() -> authorService.delete(authorId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Author not found");
+
+        verify(authorRepository, times(1)).deleteAuthorById(authorId);
+    }
+
 
 
     @Test
@@ -123,6 +148,7 @@ class AuthorServiceTest {
 
         when(authorRepository.findById(authorId)).thenReturn(Optional.of(mockAuthor));
         when(authorMapper.mapAuthorToResponseDTO(mockAuthor)).thenReturn(expected);
+        when(authorRepository.save(mockAuthor)).thenReturn(mockAuthor);
 
         AuthorResponseDTO actualResponse = authorService.updateAuthor(authorId, requestDTO);
 
@@ -131,6 +157,8 @@ class AuthorServiceTest {
 
         verify(authorRepository, times(1)).findById(authorId);
         verify(authorMapper, times(1)).mapAuthorToResponseDTO(mockAuthor);
+        verify(authorRepository, times(1)).save(mockAuthor);
+
     }
 
 
