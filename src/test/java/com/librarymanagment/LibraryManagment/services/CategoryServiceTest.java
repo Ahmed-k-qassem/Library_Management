@@ -1,0 +1,72 @@
+package com.librarymanagment.LibraryManagment.services;
+
+import com.librarymanagment.LibraryManagment.Entities.Category;
+import com.librarymanagment.LibraryManagment.Repostries.CategoryRepository;
+import com.librarymanagment.LibraryManagment.Services.CategoryService;
+import com.librarymanagment.LibraryManagment.dto.Request.CategoryRequestDTO;
+import com.librarymanagment.LibraryManagment.dto.Response.CategoryResponseDTO;
+import com.librarymanagment.LibraryManagment.util.GenericPatcher;
+import com.librarymanagment.LibraryManagment.util.dto.request.CategoryRequestDtoTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.dto.response.CategoryResponseDtoTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.entity.CategoryTestDataBuilder;
+import com.librarymanagment.LibraryManagment.util.mapper.CategoryMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CategoryServiceTest {
+    @Mock
+    private CategoryRepository categoryRepository;
+
+    @Mock
+    private CategoryMapper categoryMapper;
+
+    @Mock
+    private GenericPatcher patcher;
+
+    @InjectMocks
+    private CategoryService categoryService;
+
+
+    @Test
+    void saveCategory_shouldReturnResponseDTO(){
+        CategoryRequestDTO request = CategoryRequestDtoTestDataBuilder.getInstance().build();
+        Category categoryEntity = CategoryTestDataBuilder.getInstance().build();
+        CategoryResponseDTO expected = CategoryResponseDtoTestDataBuilder.getInstance().build();
+
+        when(categoryMapper.mapRequestDTOtoCategory(request)).thenReturn(categoryEntity);
+        when(categoryMapper.mapCategoryToResponseDTO(categoryEntity)).thenReturn(expected);
+        when(categoryRepository.save(categoryEntity)).thenReturn(categoryEntity);
+
+        CategoryResponseDTO actual = categoryService.saveCategory(request);
+
+        assertThat(actual).isEqualTo(expected);
+
+        verify(categoryRepository, times(1)).save(categoryEntity);
+        verify(categoryMapper, times(1)).mapCategoryToResponseDTO(categoryEntity);
+        verify(categoryMapper, times(1)).mapRequestDTOtoCategory(request);
+    }
+
+
+    @Test
+    void saveCategory_shouldThrowException_WhenRequestIsNull(){
+        CategoryRequestDTO request= null;
+
+        assertThatThrownBy(() -> categoryService.saveCategory(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Dev error: request is null");
+
+        verifyNoInteractions(categoryRepository);
+    }
+
+
+}
