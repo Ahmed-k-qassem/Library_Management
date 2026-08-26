@@ -25,10 +25,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final KeycloakRoleConverter keycloakRoleConverter;
-    private final UserService userService;
-    public SecurityConfig(KeycloakRoleConverter keycloakRoleConverter, UserService userService) {
+    public SecurityConfig(KeycloakRoleConverter keycloakRoleConverter) {
         this.keycloakRoleConverter = keycloakRoleConverter;
-        this.userService = userService;
     }
 
     @Bean
