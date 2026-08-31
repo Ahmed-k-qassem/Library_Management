@@ -11,6 +11,7 @@ import com.librarymanagement.LibraryManagement.dto.Response.BookResponseDTO;
 import com.librarymanagement.LibraryManagement.exception.BookNotAvailableException;
 import com.librarymanagement.LibraryManagement.util.mapper.BookMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,7 @@ public class BookService {
     }
 
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @Transactional
     public BookResponseDTO createBook(BookRequestDTO dto){
         Author author = authorService.findById(dto.authorId());
