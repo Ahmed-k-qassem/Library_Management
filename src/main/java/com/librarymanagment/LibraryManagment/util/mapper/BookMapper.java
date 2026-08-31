@@ -1,8 +1,8 @@
 package com.librarymanagment.LibraryManagment.util.mapper;
 
-import com.librarymanagment.LibraryManagment.Entities.Author;
-import com.librarymanagment.LibraryManagment.Entities.Book;
-import com.librarymanagment.LibraryManagment.Entities.Category;
+import com.librarymanagment.LibraryManagment.entity.Author;
+import com.librarymanagment.LibraryManagment.entity.Book;
+import com.librarymanagment.LibraryManagment.entity.Category;
 import com.librarymanagment.LibraryManagment.dto.Request.BookRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BookResponseDTO;
 import org.springframework.stereotype.Component;

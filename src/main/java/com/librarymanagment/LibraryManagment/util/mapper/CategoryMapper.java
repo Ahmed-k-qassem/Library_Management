@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.util.mapper;
 
-import com.librarymanagment.LibraryManagment.Entities.Category;
+import com.librarymanagment.LibraryManagment.entity.Category;
 import com.librarymanagment.LibraryManagment.dto.Request.CategoryRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.CategoryResponseDTO;
 import org.springframework.stereotype.Component;

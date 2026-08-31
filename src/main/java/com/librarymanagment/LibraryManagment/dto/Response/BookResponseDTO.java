@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.dto.Response;
 
-import com.librarymanagment.LibraryManagment.Entities.Status;
+import com.librarymanagment.LibraryManagment.entity.Status;
 
 import java.util.Date;
 

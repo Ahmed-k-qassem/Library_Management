@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.dto.Request;
 
-import com.librarymanagment.LibraryManagment.Entities.Status;
+import com.librarymanagment.LibraryManagment.entity.Status;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;

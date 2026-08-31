@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.util.mapper;
 
-import com.librarymanagment.LibraryManagment.Entities.Author;
+import com.librarymanagment.LibraryManagment.entity.Author;
 import com.librarymanagment.LibraryManagment.dto.Request.AuthorRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.AuthorResponseDTO;
 import org.springframework.stereotype.Component;

@@ -1,8 +1,8 @@
 package com.librarymanagment.LibraryManagment.util.mapper;
 
-import com.librarymanagment.LibraryManagment.Entities.Book;
-import com.librarymanagment.LibraryManagment.Entities.Borrow;
-import com.librarymanagment.LibraryManagment.Entities.Customer;
+import com.librarymanagment.LibraryManagment.entity.Book;
+import com.librarymanagment.LibraryManagment.entity.Borrow;
+import com.librarymanagment.LibraryManagment.entity.Customer;
 import com.librarymanagment.LibraryManagment.dto.Request.BorrowRequestDTO;
 import com.librarymanagment.LibraryManagment.dto.Response.BorrowResponseDTO;
 import org.springframework.stereotype.Component;

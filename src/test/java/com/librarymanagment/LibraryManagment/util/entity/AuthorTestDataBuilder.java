@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.util.entity;
 
-import com.librarymanagment.LibraryManagment.Entities.Author;
+import com.librarymanagment.LibraryManagment.entity.Author;
 
 public class AuthorTestDataBuilder {
 

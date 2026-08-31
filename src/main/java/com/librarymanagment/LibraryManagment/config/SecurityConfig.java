@@ -1,8 +1,8 @@
 package com.librarymanagment.LibraryManagment.config;
 
-import com.librarymanagment.LibraryManagment.Security.KeycloakRoleConverter;
-import com.librarymanagment.LibraryManagment.Security.filter.UserSynchronizationFilter;
-import com.librarymanagment.LibraryManagment.Services.UserService;
+import com.librarymanagment.LibraryManagment.security.KeycloakRoleConverter;
+import com.librarymanagment.LibraryManagment.security.filter.UserSynchronizationFilter;
+import com.librarymanagment.LibraryManagment.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;

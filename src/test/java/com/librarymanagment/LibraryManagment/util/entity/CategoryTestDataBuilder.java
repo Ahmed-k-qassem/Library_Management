@@ -1,6 +1,6 @@
 package com.librarymanagment.LibraryManagment.util.entity;
 
-import com.librarymanagment.LibraryManagment.Entities.Category;
+import com.librarymanagment.LibraryManagment.entity.Category;
 
 public class CategoryTestDataBuilder {
     private Long id = 1L;
