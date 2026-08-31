@@ -5,6 +5,7 @@ import com.librarymanagement.LibraryManagement.security.filter.UserSynchronizati
 import com.librarymanagement.LibraryManagement.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,7 +39,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/categories/**").hasRole("ADMIN")
-                        .requestMatchers("/api/books/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/books/**").hasRole("USER")
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/customers/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/borrow/**").hasRole("ADMIN")
