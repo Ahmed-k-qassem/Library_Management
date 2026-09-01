@@ -190,8 +190,8 @@ class AuthorServiceTest {
     void patchAuthor_ShouldMutateStateAndReturnResponse() {
         Long authorId = 1L;
         String patchBody = PatchBodyBuilder.getInstance()
-                .withAttribute("authorName")
-                .withValue("fibi nono")
+                .targetColumn("authorName")
+                .columnValue("fibi nono")
                 .build();
 
         Author existingAuthor = AuthorTestDataBuilder.anAuthor()
