@@ -3,11 +3,14 @@ package com.librarymanagement.LibraryManagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.librarymanagement.LibraryManagement.Controller.BookController;
 import com.librarymanagement.LibraryManagement.config.SecurityConfig;
+import com.librarymanagement.LibraryManagement.dto.Response.BookAuthorResponseDTO;
+import com.librarymanagement.LibraryManagement.dto.Response.BookResponseDTO;
 import com.librarymanagement.LibraryManagement.exception.GlobalExceptionHandler;
 import com.librarymanagement.LibraryManagement.security.KeycloakRoleConverter;
 import com.librarymanagement.LibraryManagement.service.BookService;
 import com.librarymanagement.LibraryManagement.service.UserService;
 import com.librarymanagement.LibraryManagement.util.dto.request.BookRequestDtoTestDataBuilder;
+import com.librarymanagement.LibraryManagement.util.dto.response.BookAuthorResponseTestDataBuilder;
 import com.librarymanagement.LibraryManagement.util.dto.response.BookResponseDtoTestDataBuilder;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -172,5 +175,43 @@ class BookControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("Book not found with id 99"));
+    }
+
+
+    @Test
+    void givenPatronRole_whenGetBooksById_thenOk() throws Exception{
+        BookResponseDTO book = BookResponseDtoTestDataBuilder.getInstance().withTitle("fibi nono").build();
+        when(bookService.getBookResponseById(1L)).thenReturn(book);
+
+        mockMvc.perform(get("/api/books/1").with(patron()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("fibi nono"));
+
+        verify(bookService).getBookResponseById(1L);
+    }
+
+    @Test
+    void givenAdminRole_whenDeleteBook_thenNoContent() throws Exception {
+        mockMvc.perform(delete("/api/books/1").with(admin()))
+                .andExpect(status().isNoContent());
+
+        verify(bookService).deleteBookById(1L);
+    }
+
+    @Test
+    void givenPatronRole_whenGetBooksForAuthor_thenOk() throws Exception{
+        Long authorId = 1L;
+        BookAuthorResponseDTO book = BookAuthorResponseTestDataBuilder.getInstance().
+                withTitle("Fibi nono")
+                .withIsbn("1292-2049")
+                .build();
+        when(bookService.getBooksForAuthor(authorId)).thenReturn(List.of(book));
+
+        mockMvc.perform(get("/api/books/author/1").with(patron()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].bookName").value("Fibi nono"))
+                .andExpect(jsonPath("$[0].isbn").value("1292-2049"));
+        verify(bookService).getBooksForAuthor(authorId);
     }
 }
