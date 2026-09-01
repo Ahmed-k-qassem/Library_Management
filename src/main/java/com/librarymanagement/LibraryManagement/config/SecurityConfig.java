@@ -39,6 +39,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/authors/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/authors/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/authors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/books/**").hasRole("USER")
