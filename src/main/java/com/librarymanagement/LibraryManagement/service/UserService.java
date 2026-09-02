@@ -2,7 +2,6 @@ package com.librarymanagement.LibraryManagement.service;
 
 import com.librarymanagement.LibraryManagement.entity.User;
 import com.librarymanagement.LibraryManagement.repository.UserRepository;
-import com.librarymanagement.LibraryManagement.dto.Request.UserRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.UserResponseDTO;
 import com.librarymanagement.LibraryManagement.util.mapper.UserMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,12 +22,6 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    @Transactional
-    public UserResponseDTO save(UserRequestDTO userRequestDTO, String keycloakUserId) {
-        User user = userMapper.mapUserRequestDTOtoUser(userRequestDTO, "USER", keycloakUserId);
-        user = userRepository.save(user);
-        return userMapper.mapUserToResponseDTO(user);
-    }
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
