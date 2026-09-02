@@ -243,30 +243,20 @@ HTTP methods provided: GET, POST
 A rare thing to see and notice in self-made projects yet i planed to include it in my own.
 I will discuss the: 
 
-* [type of testing currently](#type-of-testing)
+* [types of testing currently](#types-of-testing)
 * [pattern used](#pattern-used)
-* [why no slice testing currently?](#lack-of-sliced-testing)
 
-### type of testing
-Currently, i am using Unit testing for the service layers.
-Unit testing is rapid and fast. I used Mockito alongside to mock the repository
-I loved the testing environment so much. I added pre-conditions to most service classes methods.
-following the Design by contract approach.
+### types of testing
+#### Unit testing:<br> 
+* using junit 5 along side with mockito and AsserJ to ensure quality and validation roles and business roles are met.
+* Unit testing scope: service layer
 
+#### Sliced testing
+* WebMvcTest on controllers mainly
 ### pattern used
 I used the AAA pattern Arrange Act Assert. I learned it from Testing Spring Boot Applications Dymistified Book by Philip Riecks
 I used also from what i learned a beautiful approach where i used Builders
-Test data builders as you can notice from the file structure: 
-![img.png](Images/testDirectory.png)
-
 They help reduce manually inserting data for each object. Epically it follows the Effective java approach where using static method instead of constructors
-
-### lack of sliced testing
-
-I have to admit i am currently learning the approach of sliced testing via combining two books currently: 
-Effective software testing <br>
-spring boot applications dymistifed as i mentioned earlier
-I will add the sliced testing and complete the other aspects as well.
 
 ## Licence
 This project is ok to use everywhere since it's an educational project.
