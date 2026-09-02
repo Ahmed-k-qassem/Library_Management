@@ -6,6 +6,7 @@ import com.librarymanagement.LibraryManagement.config.SecurityConfig;
 import com.librarymanagement.LibraryManagement.dto.Request.AuthorRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.AuthorResponseDTO;
 import com.librarymanagement.LibraryManagement.exception.GlobalExceptionHandler;
+import com.librarymanagement.LibraryManagement.security.KeycloakRoleConverter;
 import com.librarymanagement.LibraryManagement.service.AuthorService;
 import com.librarymanagement.LibraryManagement.service.UserService;
 import com.librarymanagement.LibraryManagement.util.dto.request.AuthorRequestDtoTestDataBuilder;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthorController.class)
-@Import({SecurityConfig.class, KeycloakJwtTestSupport.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, KeycloakRoleConverter.class, GlobalExceptionHandler.class})
 public class AuthorControllerTest {
     @MockitoBean
     private AuthorService authorService;
