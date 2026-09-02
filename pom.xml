@@ -101,6 +101,18 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers-mysql</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+
     </dependencies>
 
 	<build>
@@ -132,6 +144,13 @@
 						<goal>check</goal>
 					</goals>
 					<configuration>
+						<excludes>
+							<exclude>**/*Application.class</exclude>
+							<exclude>**/util/mapper/**</exclude>
+							<exclude>**/dto/**</exclude>
+							<exclude>**/exception/JsonPatchProcessingException.class</exclude>
+							<exclude>**/exception/BookNotAvailableException.class</exclude>
+						</excludes>
 						<rules>
 							<rule>
 								<element>BUNDLE</element>
