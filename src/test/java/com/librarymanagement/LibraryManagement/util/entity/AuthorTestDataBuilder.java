@@ -23,12 +23,19 @@ public class AuthorTestDataBuilder {
         return this;
     }
 
+    public AuthorTestDataBuilder withoutId() {
+        this.id = null;
+        return this;
+    }
+
     public AuthorTestDataBuilder withNationality(String nationality) {
         this.nationality = nationality;
         return this;
     }
 
     public Author build() {
-        return new Author(id, authorName, nationality);
+        return id == null
+                ? new Author(authorName, nationality)
+                : new Author(id, authorName, nationality);
     }
 }
