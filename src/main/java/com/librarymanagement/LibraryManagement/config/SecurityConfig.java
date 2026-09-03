@@ -26,7 +26,16 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private static final String[] OPENAPI_WHITELIST = {
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
+            "/swagger-ui.html",
+            "/swagger-ui/**"
+    };
+
     private final KeycloakRoleConverter keycloakRoleConverter;
+
     public SecurityConfig(KeycloakRoleConverter keycloakRoleConverter) {
         this.keycloakRoleConverter = keycloakRoleConverter;
     }
@@ -38,6 +47,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(OPENAPI_WHITELIST).permitAll()
                         .requestMatchers("/api/categories/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/authors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/authors/**").hasRole("ADMIN")
@@ -45,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/authors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/books/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/books/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/books/**").hasRole("USER")
                         .requestMatchers("/api/customers/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/borrow/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
