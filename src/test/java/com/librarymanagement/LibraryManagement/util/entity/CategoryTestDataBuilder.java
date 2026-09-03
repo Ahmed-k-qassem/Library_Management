@@ -19,12 +19,17 @@ public class CategoryTestDataBuilder {
         return this;
     }
 
+    public CategoryTestDataBuilder withoutId(){
+        this.id = null;
+        return this;
+    }
+
     public CategoryTestDataBuilder withName(String name){
         this.name = name;
         return this;
     }
 
     public Category build(){
-        return new Category(id,name);
+        return id == null ? new Category(name) : new Category(id, name);
     }
 }
