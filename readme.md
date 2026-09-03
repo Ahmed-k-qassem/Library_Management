@@ -253,10 +253,14 @@ I will discuss the:
 
 #### Sliced testing
 * WebMvcTest on controllers mainly
+* DataJpaTest on repositories only for specific custom and join queries. Using test containers.
 ### pattern used
 I used the AAA pattern Arrange Act Assert. I learned it from Testing Spring Boot Applications Dymistified Book by Philip Riecks
 I used also from what i learned a beautiful approach where i used Builders
 They help reduce manually inserting data for each object. Epically it follows the Effective java approach where using static method instead of constructors
+<br>
 
+The testing directory looks as so: 
+![img.png](Images/testBranch.png)
 ## Licence
 This project is ok to use everywhere since it's an educational project.
