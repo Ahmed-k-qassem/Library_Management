@@ -5,8 +5,7 @@ spring:
   application:
     name: LibraryManagement
   profiles:
-      active: local
-
+    active: local
 
   security:
     oauth2:
@@ -14,3 +13,15 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/library-realm}
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    use-pkce-with-authorization-code-grant: true
+    oauth:
+      client-id: library-swagger-ui
+  show-actuator: false
