@@ -10,6 +10,7 @@ ___
 * [Data access Layer](#data-access-layer)
 * [Service Layer](#service-layer)
 * [Controller Layer](#controller-layer)
+* [API documentation](#api-documentation)
 * [Testing](#testing)
 * [Licence](#licence)
 ## Tech stack
@@ -238,6 +239,23 @@ HTTP methods provided: GET,POST
 general path: /api/users
 
 HTTP methods provided: GET, POST
+
+## API Documentation
+This project uses springdoc-openapi to generate an OpenAPI 3 document
+directly from the controllers — no hand-written spec to keep in sync.
+
+* Interactive UI: `/swagger-ui.html`
+* Raw document: `/v3/api-docs` (JSON) or `/v3/api-docs.yaml`
+
+Authentication in the UI: paste a bearer token, or use the Authorize
+button's OAuth2 flow if a `library-swagger-ui` public client is
+registered in Keycloak with redirect URI
+`/swagger-ui/oauth2-redirect.html`.
+
+Every endpoint documents the realm role it requires and its possible
+response codes, including the shared `ApiError` body used across the
+project's exception handling.
+
 
 ## Testing
 A rare thing to see and notice in self-made projects yet i planed to include it in my own.
