@@ -29,9 +29,9 @@ public class Book {
 
     private Date addedDate = new Date();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Author author;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
 

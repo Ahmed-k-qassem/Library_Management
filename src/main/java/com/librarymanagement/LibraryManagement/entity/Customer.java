@@ -11,7 +11,7 @@ public class Customer {
 
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     public Customer(){
