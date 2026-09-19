@@ -8,10 +8,10 @@ import com.librarymanagement.LibraryManagement.repository.BorrowRepository;
 import com.librarymanagement.LibraryManagement.dto.Request.BorrowRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.BorrowResponseDTO;
 import com.librarymanagement.LibraryManagement.util.mapper.BorrowMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class BorrowService {
@@ -38,11 +38,8 @@ public class BorrowService {
     }
 
 
-    @Transactional
-    public List<BorrowResponseDTO> getAllBorrows() {
-        return borrowRepository.findAll()
-                .stream()
-                .map(borrowMapper::mapBorrowToBorrowResponseDTO)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<BorrowResponseDTO> getAllBorrows(Pageable pageable) {
+        return borrowRepository.findAllSummaries(pageable);
     }
 }

@@ -1,5 +1,6 @@
 package com.librarymanagement.LibraryManagement.service;
 
+import com.librarymanagement.LibraryManagement.dto.Response.PageResponse;
 import com.librarymanagement.LibraryManagement.entity.Author;
 import com.librarymanagement.LibraryManagement.entity.Book;
 import com.librarymanagement.LibraryManagement.entity.Category;
@@ -11,6 +12,8 @@ import com.librarymanagement.LibraryManagement.dto.Response.BookResponseDTO;
 import com.librarymanagement.LibraryManagement.exception.BookNotAvailableException;
 import com.librarymanagement.LibraryManagement.util.mapper.BookMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +37,8 @@ public class BookService {
 
 
     @Transactional
-    public List<BookAuthorResponseDTO> getBooksForAuthor(long id){
-        return bookRepository.getBooksByAuthorId(id);
+    public Page<BookAuthorResponseDTO> getBooksForAuthor(long id, Pageable pageable){
+        return bookRepository.getBooksByAuthorId(id, pageable);
     }
 
     @Transactional
@@ -43,6 +46,12 @@ public class BookService {
         return bookRepository.getBookById(id).orElseThrow( () -> new EntityNotFoundException("Book has not been found "));
     }
 
+
+    @Transactional(readOnly = true)
+    public Page<BookResponseDTO> findAll(Pageable pageable) {
+        return bookRepository.findAll(pageable)
+                .map(bookMapper::mapBookToResponseDTO);
+    }
 
     @Transactional
     public BookResponseDTO getBookResponseById(long id){
