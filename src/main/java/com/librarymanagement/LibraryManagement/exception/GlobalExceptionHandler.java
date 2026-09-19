@@ -90,4 +90,10 @@ public class GlobalExceptionHandler {
         HttpDTO error = new HttpDTO(exc.getMessage(), HttpStatus.SERVICE_UNAVAILABLE.value());
         return new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
     }
+
+    @ExceptionHandler(InvalidSortException.class)
+    public ResponseEntity<HttpDTO> handleInvalidSort(InvalidSortException exc) {
+        HttpDTO error = new HttpDTO(exc.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 }
