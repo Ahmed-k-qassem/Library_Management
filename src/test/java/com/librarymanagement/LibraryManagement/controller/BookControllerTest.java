@@ -14,9 +14,17 @@ import com.librarymanagement.LibraryManagement.util.dto.response.BookAuthorRespo
 import com.librarymanagement.LibraryManagement.util.dto.response.BookResponseDtoTestDataBuilder;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.data.autoconfigure.web.DataWebAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,15 +33,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static com.librarymanagement.LibraryManagement.util.security.KeycloakJwtTestSupport.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookController.class)
 @Import({SecurityConfig.class, KeycloakRoleConverter.class, GlobalExceptionHandler.class})
+@ImportAutoConfiguration(DataWebAutoConfiguration.class)
 class BookControllerTest {
 
     @Autowired
@@ -69,13 +80,15 @@ class BookControllerTest {
 
     @Test
     void givenPatronRole_whenGetBooks_thenOk() throws Exception {
-        when(bookService.findAllBooks())
-                .thenReturn(List.of(BookResponseDtoTestDataBuilder.getInstance().build()));
+        when(bookService.findAll(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(
+                        List.of(BookResponseDtoTestDataBuilder.getInstance().build()),
+                        PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/api/books").with(patron()))
                 .andExpect(status().isOk());
 
-        verify(bookService).findAllBooks();
+        verify(bookService).findAll(any(Pageable.class));
     }
 
     @Test
@@ -137,7 +150,7 @@ class BookControllerTest {
 
     @Test
     void givenAuthenticatedPatron_whenGetBooks_thenUserIsSynchronised() throws Exception {
-        when(bookService.findAllBooks()).thenReturn(List.of());
+        when(bookService.findAll(any(Pageable.class))).thenReturn(Page.empty(PageRequest.of(0, 20)));
 
         mockMvc.perform(get("/api/books").with(patron()))
                 .andExpect(status().isOk());
@@ -206,12 +219,117 @@ class BookControllerTest {
                 withTitle("Fibi nono")
                 .withIsbn("1292-2049")
                 .build();
-        when(bookService.getBooksForAuthor(authorId)).thenReturn(List.of(book));
+        when(bookService.getBooksForAuthor(eq(authorId), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(book), PageRequest.of(0, 20), 1));
 
         mockMvc.perform(get("/api/books/author/1").with(patron()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].bookName").value("Fibi nono"))
-                .andExpect(jsonPath("$[0].isbn").value("1292-2049"));
-        verify(bookService).getBooksForAuthor(authorId);
+                .andExpect(jsonPath("$.content[0].bookName").value("Fibi nono"))
+                .andExpect(jsonPath("$.content[0].isbn").value("1292-2049"));
+        verify(bookService).getBooksForAuthor(eq(authorId), any(Pageable.class));
+    }
+
+
+    @Test
+    void givenNoPagingParams_whenGetBooks_thenDefaultsWithTitleSortAndIdTiebreaker() throws Exception {
+        when(bookService.findAll(any(Pageable.class))).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/books").with(patron()))
+                .andExpect(status().isOk());
+
+        Pageable sent = capturePageableSentToFindAll();
+        assertThat(sent.getPageNumber()).isZero();
+        assertThat(sent.getPageSize()).isEqualTo(20);
+        assertThat(sent.getSort()).containsExactly(Sort.Order.asc("title"), Sort.Order.asc("id"));
+    }
+
+    @Test
+    void givenPageSizeAndSortParams_whenGetBooks_thenPassedThroughWithIdTiebreaker() throws Exception {
+        when(bookService.findAll(any(Pageable.class))).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/books")
+                        .param("page", "2")
+                        .param("size", "10")
+                        .param("sort", "addedDate,desc")
+                        .with(patron()))
+                .andExpect(status().isOk());
+
+        Pageable sent = capturePageableSentToFindAll();
+        assertThat(sent.getPageNumber()).isEqualTo(2);
+        assertThat(sent.getPageSize()).isEqualTo(10);
+        assertThat(sent.getSort()).containsExactly(Sort.Order.desc("addedDate"), Sort.Order.asc("id"));
+    }
+
+    @Test
+    void givenOversizedPage_whenGetBooks_thenClampedToMaxPageSize() throws Exception {
+        when(bookService.findAll(any(Pageable.class))).thenReturn(Page.empty());
+
+        mockMvc.perform(get("/api/books").param("size", "5000").with(patron()))
+                .andExpect(status().isOk());
+
+        assertThat(capturePageableSentToFindAll().getPageSize()).isEqualTo(100);
+    }
+
+    @Test
+    void givenDisallowedSortField_whenGetBooks_thenBadRequestAndServiceNeverCalled() throws Exception {
+        mockMvc.perform(get("/api/books").param("sort", "author.nationality").with(patron()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.statusCode").value(400))
+                .andExpect(jsonPath("$.message").value(startsWith("Invalid sort property")));
+
+        verifyNoInteractions(bookService);
+    }
+
+    @Test
+    void givenOneGoodAndOneBadSortField_whenGetBooks_thenBadRequest() throws Exception {
+        mockMvc.perform(get("/api/books")
+                        .param("sort", "title,asc")
+                        .param("sort", "password,desc")
+                        .with(patron()))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(bookService);
+    }
+
+    @Test
+    void givenMiddlePageFromService_whenGetBooks_thenEnvelopeCarriesAllMetadata() throws Exception {
+        when(bookService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(
+                List.of(BookResponseDtoTestDataBuilder.getInstance().withTitle("Dune").build()),
+                PageRequest.of(1, 1), 3));
+
+        mockMvc.perform(get("/api/books").with(patron()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Dune"))
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.first").value(false))
+                .andExpect(jsonPath("$.last").value(false));
+    }
+
+    @Test
+    void givenEmptyPageFromService_whenGetBooks_thenOkWithEmptyContent() throws Exception {
+        when(bookService.findAll(any(Pageable.class))).thenReturn(Page.empty(PageRequest.of(9, 20)));
+
+        mockMvc.perform(get("/api/books").param("page", "9").with(patron()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    void givenSortFieldNotAllowedForAuthorBooks_whenGetBooksForAuthor_thenBadRequest() throws Exception {
+        mockMvc.perform(get("/api/books/author/1").param("sort", "addedDate").with(patron()))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(bookService);
+    }
+
+    private Pageable capturePageableSentToFindAll() {
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(bookService).findAll(captor.capture());
+        return captor.getValue();
     }
 }

@@ -3,6 +3,7 @@ package com.librarymanagement.LibraryManagement.Controller;
 import com.librarymanagement.LibraryManagement.dto.Request.AuthorRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.AuthorResponseDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.dto.Response.PageResponse;
 import com.librarymanagement.LibraryManagement.dto.doc.JsonPatchOperationDTO;
 import com.librarymanagement.LibraryManagement.service.AuthorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,10 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -43,8 +47,8 @@ public class AuthorController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = AuthorResponseDTO.class))))
-    public List<AuthorResponseDTO> getAuthors() {
-        return authorService.findAll();
+    public PageResponse<AuthorResponseDTO> getAuthors(Pageable pageable) {
+        return PageResponse.from(authorService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
