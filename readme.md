@@ -10,12 +10,13 @@ ___
 * [Data access Layer](#data-access-layer)
 * [Service Layer](#service-layer)
 * [Controller Layer](#controller-layer)
+* [Pagination](#pagination)
 * [API documentation](#api-documentation)
 * [Testing](#testing)
 * [Licence](#licence)
 ## Tech stack
 * Spring boot 4.0.6
-* Maven 
+* Maven
 * Java 17 LTS
 * MySql Database
 * Jpa hibernate
@@ -29,7 +30,7 @@ ___
 I used mysql workbench for database entity relationship model. **Crow's foot notation
 has been used**
 ![ER.png](DB/ER.png)
-### Indexes: <br> 
+### Indexes: <br>
 * The user table has the keycloak uuid indexed alongside with the email (UNIQUE)
 * All FKs and PKs are auto indexed by default in mySql workbench.
 
@@ -93,8 +94,8 @@ We will first cover the main components of security in the system: <br>
 <br>
 3- UserSynchronizationFilter
 
-### Security Configuration: 
-We will begin with the filter chain at first: 
+### Security Configuration:
+We will begin with the filter chain at first:
 ![img.png](Images/Code-Snippests/Security/FilterChain.png)
 * Disabling CSRF protection because each request will already require a JWT.
 * The session management policy is set to stateless instead of a default stateful
@@ -103,14 +104,14 @@ We will begin with the filter chain at first:
 * Ensuring OAuth2 Resource server configuration and to ensure the converter is included (will be covered down)
 * Adding the filter after the barrer token filter (will be covered down)
 
-#### Cors config: 
+#### Cors config:
 ![img.png](Images/Code-Snippests/Security/corsConfig.png)
 Firstly we set the allowed origins as the main purpose of cors in general:
 * Allowed origins as an example
 * Allowed methods as an example
 * allowed header as an example
-<br>
-Note: The reason why not using ( * ) is because it is a bad practice.
+  <br>
+  Note: The reason why not using ( * ) is because it is a bad practice.
 
 ### KeycloakRoleConverter
 #### Purpose of converter:
@@ -119,7 +120,7 @@ most importantly is the realm-access claim which contains an array of roles
 <br>
 Spring expects a list which needs to be extracted and mapped.
 <br>
-As shown in the next image: 
+As shown in the next image:
 ![img.png](Images/Code-Snippests/Security/keycloakConverter.png)
 Implementation for the Converter interface so we can map this to JwtConverter in the security config.
 <br>
@@ -132,12 +133,12 @@ Then we extract a Collection of roles from the realm access (contains roles).
 Our system unfortunately has a design flaw where the user has only a string of roles instead of a list
 
 ### UserSynchronizationFilter
-#### Purpose of the filter: 
+#### Purpose of the filter:
 Our users in db has no track of their passwords. However, we keep track of their UUID that keycloak offers.
 <br>
 To sync that with our database alongside with the roles we also extracted. We will have to make this filter trigger after the token is recieved and converted
 <br>
-The filter is a onceperrquest filter. And it will map the details of the token 
+The filter is a onceperrquest filter. And it will map the details of the token
 specifically (username, roles, uuid)
 <br>
 using such helper methods to as much as possible make the code readable
@@ -160,14 +161,14 @@ the @modifying annotation is used to tell hibernate not to fetch a whole entity 
 this optimizes better than the normal delete by id operations offered by JPA
 
 ## Service Layer
-Service Layer is where the main business logic exists in. Each service class has the repository dependency in it alongside with 
+Service Layer is where the main business logic exists in. Each service class has the repository dependency in it alongside with
 the mappers needed. Author and Category use another class called GenericPatcher util class.
 
 Code is generally self-explanatory. However, what's worth noting is the utillity class
 GenericPatcher.
-Here's the code: 
+Here's the code:
 ![img.png](Images/Code-Snippests/Service/GenericPatcherUtil.png)
-### Purpose: 
+### Purpose:
 This class abstracts the duplication of code that used to exists in my code.
 
 The methodology is simple. We take the objectMapper dependecy (bean defiend in JacksonConfig class)
@@ -208,7 +209,7 @@ Each of the controllers does not return the real entity of hibernate.
 
 Instead. It returns a responseDto to replace that entity (service layer handles the mapping)
 
-To begin with: 
+To begin with:
 
 ### Author controller
 general path: /api/authors (i admit it. no versioning is a bad practice. it should be something like /api/v1/author)
@@ -240,6 +241,93 @@ general path: /api/users
 
 HTTP methods provided: GET, POST
 
+## Pagination
+Every list endpoint that can grow without a limit is paged. The rule i followed is simple:
+a collection endpoint must be **bounded**, and pagination is how most of them get bounded.
+
+Paged endpoints:
+* `GET /api/books`
+* `GET /api/books/author/{authorId}`
+* `GET /api/borrow`
+* `GET /api/authors`
+
+Categories are intentionally not paged. They are bounded by nature (a library has dozens of categories, not thousands).
+Customers and users are next in line.
+
+### Request parameters
+Standard Spring Data parameters: `?page=0&size=20&sort=title,asc`
+
+Global guardrails are set in `application.yml`:
+```yaml
+spring:
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+        one-indexed-parameters: false
+```
+`max-page-size` is the important one. Without it a client can send `size=5000` and the endpoint is unbounded again.
+
+### Response shape
+Lists are wrapped in a generic `PageResponse<T>` record instead of returning Spring's `PageImpl` directly
+(its JSON shape is not a stable contract across versions):
+```json
+{
+  "content": [ ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 55,
+  "totalPages": 3,
+  "first": true,
+  "last": false
+}
+```
+A page past the end returns `200` with an empty `content`, not a `404`.
+
+### Sorting
+The `sort` parameter binds directly to entity property paths. That means a client could sort by
+an association like `customer.user.keycloakUserId`, forcing an unplanned join and ordering by a security identifier.
+<br>
+To prevent that, a `SortValidator` utility checks the requested sort against a whitelist per endpoint,
+and any other field returns `400` with the shared `ApiError` body before anything reaches the database.
+
+| Endpoint | Sortable fields | Default sort |
+|---|---|---|
+| `/api/books` | title, isbn, addedDate, pageCount | title |
+| `/api/books/author/{authorId}` | title, isbn, pageCount | title |
+| `/api/borrow` | borrowDate | borrowDate (newest first) |
+
+The id is always appended as a tiebreaker. Without it, two books with the same title can come back in a different
+order on each query, and a row shows up on two pages or on none.
+<br>
+(i admit it. the authors endpoint still takes the raw pageable without the whitelist, it is next to be fixed)
+
+### Fetching: projections instead of entities
+Read-only list queries use JPQL constructor projections directly into the response DTO, for example:
+```java
+@Query(value = """
+        select new ...BorrowResponseDTO(br.id, b.title, c.name, br.borrowDate)
+        from Borrow br
+        left join br.book b
+        left join br.customer c
+        """,
+        countQuery = "select count(br) from Borrow br")
+Page<BorrowResponseDTO> findAllSummaries(Pageable pageable);
+```
+* Only the needed columns are selected, and no managed entities are created.
+* `left join` so a row with a missing relation is still listed and matches the count.
+* An explicit `countQuery` without the joins, since joining does not change the number of rows being counted.
+* One page costs exactly two statements (data + count), which removes the N+1 problem the eager `@ManyToOne` mappings caused on borrows.
+
+Write operations (POST, PATCH, DELETE) still load managed entities, since projections cannot be dirty checked.
+
+### Testing pagination
+* Unit tests for `SortValidator` and `PageResponse`.
+* `WebMvcTest` on the controllers: defaults, the size clamp, the id tiebreaker, rejected sort fields and the JSON envelope.
+* `DataJpaTest` with test containers on the repositories: page boundaries, no duplicates across pages,
+  the left join, the projection field order, and a query count assertion using Hibernate statistics.
+
 ## API Documentation
 This project uses springdoc-openapi to generate an OpenAPI 3 document
 directly from the controllers — no hand-written spec to keep in sync.
@@ -259,13 +347,13 @@ project's exception handling.
 
 ## Testing
 A rare thing to see and notice in self-made projects yet i planed to include it in my own.
-I will discuss the: 
+I will discuss the:
 
 * [types of testing currently](#types-of-testing)
 * [pattern used](#pattern-used)
 
 ### types of testing
-#### Unit testing:<br> 
+#### Unit testing:<br>
 * using junit 5 along side with mockito and AsserJ to ensure quality and validation roles and business roles are met.
 * Unit testing scope: service layer
 
@@ -278,7 +366,7 @@ I used also from what i learned a beautiful approach where i used Builders
 They help reduce manually inserting data for each object. Epically it follows the Effective java approach where using static method instead of constructors
 <br>
 
-The testing directory looks as so: 
+The testing directory looks as so:
 ![img.png](Images/testBranch.png)
 ## Licence
 This project is ok to use everywhere since it's an educational project.
