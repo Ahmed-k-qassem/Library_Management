@@ -1,8 +1,10 @@
 package com.librarymanagement.LibraryManagement.service;
 
 import com.librarymanagement.LibraryManagement.dto.Response.BookAuthorResponseDTO;
+import com.librarymanagement.LibraryManagement.dto.Response.BookResponseDTO;
 import com.librarymanagement.LibraryManagement.repository.BookRepository;
 import com.librarymanagement.LibraryManagement.util.dto.response.BookAuthorResponseTestDataBuilder;
+import com.librarymanagement.LibraryManagement.util.dto.response.BookResponseDtoTestDataBuilder;
 import com.librarymanagement.LibraryManagement.util.mapper.BookMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,11 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
@@ -39,33 +45,55 @@ public class BookServiceTest {
     @DisplayName("Positive Testing for find books for specific author")
     void getBooksForAuthor_ShouldReturnBooksForValidAuthor(){
 
-        Long authorId = 1L;
-        List<BookAuthorResponseDTO> mockedList = List.of(
+        long authorId = 1L;
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<BookAuthorResponseDTO> mockedPage = new PageImpl<>(List.of(
                 BookAuthorResponseTestDataBuilder.getInstance().withTitle("fibi_chubi").build(),
-                BookAuthorResponseTestDataBuilder.getInstance().withTitle("Lobi_fiba").build());
-        when(bookRepository.getBooksByAuthorId(authorId)).thenReturn(mockedList);
+                BookAuthorResponseTestDataBuilder.getInstance().withTitle("Lobi_fiba").build()),
+                pageable, 2);
+        when(bookRepository.getBooksByAuthorId(authorId, pageable)).thenReturn(mockedPage);
 
 
-        List<BookAuthorResponseDTO> real = bookService.getBooksForAuthor(authorId);
+        Page<BookAuthorResponseDTO> real = bookService.getBooksForAuthor(authorId, pageable);
 
 
-        assertThat(real).isEqualTo(mockedList);
+        assertThat(real).isEqualTo(mockedPage);
 
-        verify(bookRepository, times(1)).getBooksByAuthorId(authorId);
+        verify(bookRepository, times(1)).getBooksByAuthorId(authorId, pageable);
     }
 
     @Test
     @DisplayName("Negative testing for find books for specific author")
-    void getBooksForAuthor_ShouldReturnEmptyList_WhenAuthorIdHasNoBooks(){
-        Long authorId =1L;
-        List<BookAuthorResponseDTO> mockedList = List.of();
+    void getBooksForAuthor_ShouldReturnEmptyPage_WhenAuthorIdHasNoBooks(){
+        long authorId = 1L;
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<BookAuthorResponseDTO> mockedPage = Page.empty(pageable);
 
-        when(bookRepository.getBooksByAuthorId(authorId)).thenReturn(mockedList);
+        when(bookRepository.getBooksByAuthorId(authorId, pageable)).thenReturn(mockedPage);
 
-        List<BookAuthorResponseDTO> real = bookService.getBooksForAuthor(authorId);
+        Page<BookAuthorResponseDTO> real = bookService.getBooksForAuthor(authorId, pageable);
 
-        assertThat(real).isEqualTo(mockedList);
+        assertThat(real.getContent()).isEmpty();
+        assertThat(real.getTotalElements()).isZero();
 
-        verify(bookRepository, times(1)).getBooksByAuthorId(authorId);
+        verify(bookRepository, times(1)).getBooksByAuthorId(authorId, pageable);
+    }
+
+    @Test
+    @DisplayName("findAll forwards the pageable unchanged and keeps the page metadata")
+    void givenPageable_whenFindAll_thenForwardsItUnchangedAndKeepsMetadata() {
+        Pageable pageable = PageRequest.of(2, 10, Sort.by("title").and(Sort.by("id")));
+        Page<BookResponseDTO> stubbed = new PageImpl<>(
+                List.of(BookResponseDtoTestDataBuilder.getInstance().build()), pageable, 21);
+        when(bookRepository.findAllSummaries(pageable)).thenReturn(stubbed);
+
+        Page<BookResponseDTO> result = bookService.findAll(pageable);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getTotalElements()).isEqualTo(21);
+        assertThat(result.getNumber()).isEqualTo(2);
+        assertThat(result.getSize()).isEqualTo(10);
+        verify(bookRepository).findAllSummaries(pageable);
+        verifyNoInteractions(bookMapper);
     }
 }
