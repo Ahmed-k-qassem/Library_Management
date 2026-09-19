@@ -4,7 +4,9 @@ import com.librarymanagement.LibraryManagement.dto.Request.BookRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.BookAuthorResponseDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.BookResponseDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.dto.Response.PageResponse;
 import com.librarymanagement.LibraryManagement.service.BookService;
+import com.librarymanagement.LibraryManagement.util.SortValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -15,17 +17,26 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/books")
 @Tag(name = "Books")
 public class BookController {
+    private static final Set<String> SORTABLE =
+            Set.of("title", "isbn", "addedDate", "pageCount");
+
+    private static final Sort DEFAULT_SORT = Sort.by("title");
 
     private final BookService bookService;
 
@@ -43,8 +54,17 @@ public class BookController {
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     array = @ArraySchema(schema = @Schema(implementation = BookResponseDTO.class))))
-    public List<BookResponseDTO> getBooks() {
-        return bookService.findAllBooks();
+    public PageResponse<BookResponseDTO> getBooks(
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        Sort sort = SortValidator.validate(pageable.getSort(), SORTABLE, DEFAULT_SORT);
+
+        Pageable safe = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort.and(Sort.by("id")));
+
+        return PageResponse.from(bookService.findAll(safe));
     }
 
     @GetMapping("/{id}")
@@ -92,10 +112,15 @@ public class BookController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = HttpDTO.class)))
     })
-    public List<BookAuthorResponseDTO> getBooksForAuthor(
+    public PageResponse<BookAuthorResponseDTO> getBooksForAuthor(
             @Parameter(description = "Database id of the author", example = "1", required = true)
-            @PathVariable long authorId) {
-        return bookService.getBooksForAuthor(authorId);
+            @PathVariable long authorId, Pageable pageable) {
+        Sort sort = SortValidator.validate(pageable.getSort(), SORTABLE, DEFAULT_SORT);
+        Pageable safe = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort.and(Sort.by("id")));
+        return PageResponse.from(bookService.getBooksForAuthor(authorId, safe));
     }
 
     @PostMapping
