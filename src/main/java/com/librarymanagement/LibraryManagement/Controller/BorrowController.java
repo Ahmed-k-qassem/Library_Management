@@ -3,21 +3,27 @@ package com.librarymanagement.LibraryManagement.Controller;
 import com.librarymanagement.LibraryManagement.dto.Request.BorrowRequestDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.BorrowResponseDTO;
 import com.librarymanagement.LibraryManagement.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.dto.Response.PageResponse;
 import com.librarymanagement.LibraryManagement.service.BorrowService;
+import com.librarymanagement.LibraryManagement.util.SortValidator;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/borrow")
@@ -26,22 +32,41 @@ public class BorrowController {
 
     private final BorrowService borrowService;
 
+    private static final Set<String> SORTABLE = Set.of("borrowDate");
+
+    private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, "borrowDate");
+
     public BorrowController(BorrowService borrowService) {
         this.borrowService = borrowService;
     }
 
     @GetMapping
     @Operation(
-            summary = "List every borrowing record",
-            description = "Requires the **ADMIN** realm role.")
-    @ApiResponse(
-            responseCode = "200",
-            description = "All borrowing records, possibly empty",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    array = @ArraySchema(schema = @Schema(implementation = BorrowResponseDTO.class))))
-    public List<BorrowResponseDTO> getAllBorrowings() {
-        return borrowService.getAllBorrows();
+            summary = "List borrowing records, one page at a time",
+            description = """
+                    Paged and sorted. `size` is capped at 100. Sortable field: `borrowDate`;
+                    any other sort field returns 400. Defaults to page 0, size 20, newest first.
+                    Requires the **ADMIN** realm role.""")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "One page of borrowing records. A page past the end has empty `content`."),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "The sort field is not one of the allowed values",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = HttpDTO.class)))
+    })
+    public PageResponse<BorrowResponseDTO> getAllBorrowings(
+            @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.from(borrowService.getAllBorrows(withSafeSort(pageable)));
+    }
+
+    private static Pageable withSafeSort(Pageable requested) {
+        Sort sort = SortValidator.validate(requested.getSort(), SORTABLE, DEFAULT_SORT);
+        return PageRequest.of(requested.getPageNumber(), requested.getPageSize(),
+                sort.and(Sort.by(Sort.Direction.DESC, "id")));
     }
 
     @PostMapping
