@@ -1,6 +1,9 @@
 package com.librarymanagement.LibraryManagement.repository;
 
+import com.librarymanagement.LibraryManagement.dto.Response.AuthorResponseDTO;
 import com.librarymanagement.LibraryManagement.entity.Author;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +17,14 @@ import java.util.Optional;
 public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     List<Author> findAuthorsByNationality(String nationality);
+
+
+    @Query(value = """
+        SELECT new com.librarymanagement.LibraryManagement.dto.Response.AuthorResponseDTO(a.id, a.authorName, a.nationality)
+        FROM Author a
+        """)
+    Page<AuthorResponseDTO> findAllSummaries(Pageable pageable);
+
 
     Optional<Author> findAuthorById(long id);
 
