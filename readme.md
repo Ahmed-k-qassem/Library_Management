@@ -374,8 +374,10 @@ The testing directory looks as so:
 # Library management system V2.0.0
 
 * Key changes: Modified the package structure from package-by-layer -> package-by-feature
+
 <br>
 The package structuring goes as follows:
+
 ```
 LibraryManagement/
 ├── DB/                               # Database related files (e.g., ER diagrams)
@@ -425,5 +427,6 @@ Which lead me to the conclusion of morphing the whole project structuring to pac
 It provided better maintainability and better readability as well.
 
 <hr>
+
 ## Licence
 This project is ok to use everywhere since it's an educational project.
