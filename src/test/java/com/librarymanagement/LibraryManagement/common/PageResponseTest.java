@@ -1,6 +1,6 @@
 package com.librarymanagement.LibraryManagement.common;
 
-import com.librarymanagement.LibraryManagement.common.dto.Response.PageResponse;
+import com.librarymanagement.LibraryManagement.common.dto.PageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;

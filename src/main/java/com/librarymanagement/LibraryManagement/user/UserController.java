@@ -1,6 +1,6 @@
 package com.librarymanagement.LibraryManagement.user;
 
-import com.librarymanagement.LibraryManagement.common.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.common.dto.HttpDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;

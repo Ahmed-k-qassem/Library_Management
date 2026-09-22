@@ -1,4 +1,4 @@
-package com.librarymanagement.LibraryManagement.common.dto.Response;
+package com.librarymanagement.LibraryManagement.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;

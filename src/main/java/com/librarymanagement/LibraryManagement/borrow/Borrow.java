@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class Borrow {
+class Borrow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

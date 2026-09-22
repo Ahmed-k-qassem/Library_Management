@@ -1,6 +1,6 @@
 package com.librarymanagement.LibraryManagement.category;
 
-import com.librarymanagement.LibraryManagement.common.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.common.dto.HttpDTO;
 import com.librarymanagement.LibraryManagement.common.dto.doc.JsonPatchOperationDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

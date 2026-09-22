@@ -1,7 +1,7 @@
 package com.librarymanagement.LibraryManagement.book;
 
-import com.librarymanagement.LibraryManagement.common.dto.Response.HttpDTO;
-import com.librarymanagement.LibraryManagement.common.dto.Response.PageResponse;
+import com.librarymanagement.LibraryManagement.common.dto.HttpDTO;
+import com.librarymanagement.LibraryManagement.common.dto.PageResponse;
 import com.librarymanagement.LibraryManagement.common.SortValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

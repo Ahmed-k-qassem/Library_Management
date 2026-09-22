@@ -1,7 +1,7 @@
 package com.librarymanagement.LibraryManagement.common.exception;
 
 import com.librarymanagement.LibraryManagement.borrow.BookNotAvailableException;
-import com.librarymanagement.LibraryManagement.common.dto.Response.HttpDTO;
+import com.librarymanagement.LibraryManagement.common.dto.HttpDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
