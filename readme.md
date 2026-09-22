@@ -14,6 +14,7 @@ ___
 * [API documentation](#api-documentation)
 * [Testing](#testing)
 * [Licence](#licence)
+* [Second version of project](#library-management-system-v200)
 ## Tech stack
 * Spring boot 4.0.6
 * Maven
@@ -368,5 +369,61 @@ They help reduce manually inserting data for each object. Epically it follows th
 
 The testing directory looks as so:
 ![img.png](Images/testBranch.png)
+<hr style="height: 2px">
+
+# Library management system V2.0.0
+
+* Key changes: Modified the package structure from package-by-layer -> package-by-feature
+<br>
+The package structuring goes as follows:
+```
+LibraryManagement/
+├── DB/                               # Database related files (e.g., ER diagrams)
+│   └── ER.png
+├── src/
+│   ├── main/java/.../LibraryManagement/
+│   │   ├── author/                   # Author feature — entity, controller, service,
+│   │   │                             #   repository, mapper and DTOs, all in one package
+│   │   ├── book/                     # Book feature (+ Status enum, a Book field)
+│   │   ├── borrow/                   # Borrowing feature — the join between books and customers
+│   │   ├── category/                 # Category feature
+│   │   ├── customer/                 # Customer feature
+│   │   ├── user/                     # User feature — mirrors Keycloak identities locally
+│   │   ├── common/                   # Shared infrastructure, owned by no single feature
+│   │   │   ├── config/               #   Jackson, OpenAPI and Security configuration
+│   │   │   │   └── openapi/          #   OpenAPI response customizer
+│   │   │   ├── dto/                  #   HttpDTO (error envelope), PageResponse,
+│   │   │   │                         #     JsonPatchOperationDTO (docs only)
+│   │   │   ├── exception/            #   GlobalExceptionHandler + the exceptions it handles
+│   │   │   ├── security/             #   KeycloakRoleConverter, UserSynchronizationFilter
+│   │   │   ├── GenericPatcher.java   #   RFC 6902 JSON Patch application
+│   │   │   └── SortValidator.java    #   Whitelist validation for sort parameters
+│   │   └── LibraryManagementApplication.java
+│   ├── main/resources/               # Application properties and static resources
+│   └── test/java/.../LibraryManagement/
+│       ├── author/                   # Tests mirror main exactly — same package names,
+│       ├── book/                     #   so tests can see package-private classes
+│       ├── borrow/
+│       ├── category/
+│       ├── customer/
+│       ├── user/
+│       └── common/                   # Shared test support (Testcontainers base class,
+│                                     #   Keycloak JWT test support, patch builders)
+├── LMS_logger                        # Application logging output/configurations
+├── pom.xml                           # Maven dependencies and build configuration
+└── readme.md                         # Project documentation
+```
+
+### Why package by feature ?
+The main reason of package by layer was to ship the project and understand the real design of spring boot applications
+
+However, after further phases in the project and more classes and dependencies started to come out. I've noticed that the project became unmaintainable
+
+Moreover, The project itself was hard to track since each layer is separate than its purpose layers.
+Which lead me to the conclusion of morphing the whole project structuring to package by feature.
+
+It provided better maintainability and better readability as well.
+
+<hr>
 ## Licence
 This project is ok to use everywhere since it's an educational project.
