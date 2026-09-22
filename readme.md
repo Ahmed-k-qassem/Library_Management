@@ -379,41 +379,42 @@ The testing directory looks as so:
 The package structuring goes as follows:
 
 ```
-LibraryManagement/
-├── DB/                               # Database related files (e.g., ER diagrams)
-│   └── ER.png
-├── src/
-│   ├── main/java/.../LibraryManagement/
-│   │   ├── author/                   # Author feature — entity, controller, service,
-│   │   │                             #   repository, mapper and DTOs, all in one package
-│   │   ├── book/                     # Book feature (+ Status enum, a Book field)
-│   │   ├── borrow/                   # Borrowing feature — the join between books and customers
-│   │   ├── category/                 # Category feature
-│   │   ├── customer/                 # Customer feature
-│   │   ├── user/                     # User feature — mirrors Keycloak identities locally
-│   │   ├── common/                   # Shared infrastructure, owned by no single feature
-│   │   │   ├── config/               #   Jackson, OpenAPI and Security configuration
-│   │   │   │   └── openapi/          #   OpenAPI response customizer
-│   │   │   ├── dto/                  #   HttpDTO (error envelope), PageResponse,
-│   │   │   │                         #     JsonPatchOperationDTO (docs only)
-│   │   │   ├── exception/            #   GlobalExceptionHandler + the exceptions it handles
-│   │   │   ├── security/             #   KeycloakRoleConverter, UserSynchronizationFilter
-│   │   │   ├── GenericPatcher.java   #   RFC 6902 JSON Patch application
-│   │   │   └── SortValidator.java    #   Whitelist validation for sort parameters
-│   │   └── LibraryManagementApplication.java
-│   ├── main/resources/               # Application properties and static resources
-│   └── test/java/.../LibraryManagement/
-│       ├── author/                   # Tests mirror main exactly — same package names,
-│       ├── book/                     #   so tests can see package-private classes
-│       ├── borrow/
-│       ├── category/
-│       ├── customer/
-│       ├── user/
-│       └── common/                   # Shared test support (Testcontainers base class,
-│                                     #   Keycloak JWT test support, patch builders)
-├── LMS_logger                        # Application logging output/configurations
-├── pom.xml                           # Maven dependencies and build configuration
-└── readme.md                         # Project documentation
+  LibraryManagement/
+  ├── DB/                               # Database related files (e.g., ER diagrams)
+  │   └── ER.png
+  ├── src/
+  │   ├── main/java/.../LibraryManagement/
+  │   │   ├── author/                   # Author feature — entity, controller, service,
+  │   │   │                             #   repository, mapper and DTOs, all in one package
+  │   │   ├── book/                     # Book feature (+ Status enum, a Book field)
+  │   │   ├── borrow/                   # Borrowing feature — the join between books and customers
+  │   │   ├── category/                 # Category feature
+  │   │   ├── customer/                 # Customer feature
+  │   │   ├── user/                     # User feature — mirrors Keycloak identities locally
+  │   │   ├── common/                   # Shared infrastructure, owned by no single feature
+  │   │   │   ├── config/               #   Jackson, OpenAPI and Security configuration
+  │   │   │   │   └── openapi/          #   OpenAPI response customizer
+  │   │   │   ├── dto/                  #   HttpDTO (error envelope), PageResponse,
+  │   │   │   │                         #     JsonPatchOperationDTO (docs only)
+  │   │   │   ├── exception/            #   GlobalExceptionHandler + the exceptions it handles
+  │   │   │   ├── security/             #   KeycloakRoleConverter, UserSynchronizationFilter
+  │   │   │   ├── GenericPatcher.java   #   RFC 6902 JSON Patch application
+  │   │   │   └── SortValidator.java    #   Whitelist validation for sort parameters
+  │   │   └── LibraryManagementApplication.java
+  │   ├── main/resources/               # Application properties and static resources
+  │   └── test/java/.../LibraryManagement/
+  │       ├── author/                   # Tests mirror main exactly — same package names,
+  │       ├── book/                     #   so tests can see package-private classes
+  │       ├── borrow/
+  │       ├── category/
+  │       ├── customer/
+  │       ├── user/
+  │       └── common/                   # Shared test support (Testcontainers base class,
+  │                                     #   Keycloak JWT test support, patch builders)
+  ├── LMS_logger                        # Application logging output/configurations
+  ├── pom.xml                           # Maven dependencies and build configuration
+  └── readme.md                         # Project documentation
+
 ```
 
 ### Why package by feature ?
